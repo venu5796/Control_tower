@@ -6,398 +6,323 @@
     <title>Acquia Program Control Tower</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <style>
-        /* ── Modern Executive Tokens (Control Tower Redesign) ────── */
-        :root {
-            --color-background-primary:   #ffffff;
-            --color-background-secondary: #f5f0e8; /* Linen Sidebar Light */
-            --color-background-tertiary:  #faf8f4; /* Main Canvas Light */
-            
-            --color-text-primary:         #1a1a1a;
-            --color-text-secondary:       #4a3f32;
-            --color-text-tertiary:        #a8957a;
-            
-            --color-border-primary:       #e8e0d4;
-            --color-border-secondary:     #ede8df;
-            --color-border-tertiary:      rgba(0,0,0,0.08);
-
-            --color-accent:               #ea580c; /* Dark Tangerine Light */
-            --color-accent-soft:          #fff8f2;
-            
-            --color-background-success:   #eaf3de;
-            --color-text-success:         #3b6d11;
-            --color-background-warning:   #faeeda;
-            --color-text-warning:         #854f0b;
-            --color-background-danger:    #fcebeb;
-            --color-text-danger:          #a32d2d;
-            --color-background-info:      #f0f9ff;
-            --color-text-info:            #0284c7;
-
-            --border-radius-sm:           6px;
-            --border-radius-md:           10px;
-            --border-radius-lg:           12px;
-            
-            --font-sans: 'DM Sans', -apple-system, system-ui, sans-serif;
-            --font-mono: 'DM Mono', monospace;
-            
-            --shadow-card:                0 1px 3px rgba(0,0,0,0.05);
-            --transition:                 all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-
-            /* Legacy & Functional mappings */
-            --primary:       var(--color-accent);
-            --accent:        var(--color-accent);
-            --bg:            var(--color-background-tertiary);
-            --surface:       var(--color-background-primary);
-            --text:          var(--color-text-primary);
-            --muted:         var(--color-text-secondary);
-            --border:        var(--color-border-tertiary);
-            --radius:        var(--border-radius-lg);
-            --success:       var(--color-text-success);
-            --danger:        var(--color-text-danger);
-            --warning:       var(--color-text-warning);
-            --border-subtle: rgba(0, 0, 0, 0.08);
-            --accent-soft:   var(--color-accent-soft);
-        }
-
-        [data-theme="dark"] {
-            --color-background-primary:   rgba(255,255,255,0.05); /* Glass Surface */
-            --color-background-secondary: #1a1a1a; /* Charcoal Sidebar Dark */
-            --color-background-tertiary:  #000000; /* Pure Black Main Canvas */
-            
-            --color-text-primary:         #f8fafc;
-            --color-text-secondary:       rgba(255,255,255,0.65);
-            --color-text-tertiary:        rgba(255,255,255,0.35);
-            
-            --color-border-primary:       rgba(255,255,255,0.12);
-            --color-border-secondary:     rgba(255,255,255,0.15);
-            --color-border-tertiary:      rgba(255,255,255,0.1);
-
-            --color-accent:               #f97316; /* Orange Accent Dark */
-            --color-accent-soft:          rgba(249,115,22,0.07);
-            
-            --shadow-card:                0 8px 32px 0 rgba(0,0,0,0.8);
-
-            --bg:            var(--color-background-tertiary);
-            --surface:       var(--color-background-primary);
-            --text:          var(--color-text-primary);
-            --muted:         var(--color-text-secondary);
-            --border:        var(--color-border-tertiary);
-            --border-subtle: rgba(255, 255, 255, 0.06);
-        }
-
-        /* ── Reset & Base ──────────────────────────────────── */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            font-family: var(--font-sans); 
-            background: var(--bg); 
-            color: var(--text); 
-            font-size: 13px; 
-            line-height: 1.5; 
-            -webkit-font-smoothing: antialiased;
-            overflow: hidden;
-            height: 100vh;
-        }
-
-        /* ── Layout ── */
-        .app-shell { 
-            display: grid; 
-            grid-template-columns: 180px 1fr; 
-            height: 100vh; 
-            width: 100%; 
-        }
-        
-        .sidebar { 
-            width: 180px; 
-            flex-shrink: 0; 
-            background: var(--color-background-secondary); 
-            padding: 16px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px; 
-            overflow-y: auto;
-            border-right: 0.5px solid var(--color-border-tertiary);
-        }
-
-        .main-body {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            background: var(--color-background-tertiary);
-        }
-
-        .content-area { 
-            flex: 1; 
-            padding: 16px; 
-            overflow-y: auto; 
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .topbar { 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            padding: 8px 14px; 
-            background: var(--color-background-primary); 
-            border: 0.5px solid var(--color-border-primary); 
-            border-radius: 10px;
-            margin: 16px 16px 0 16px;
-            z-index: 100;
-        }
-
-        /* ── Components ── */
-        .card {
-            background: var(--color-background-primary);
-            border: 0.5px solid var(--color-border-primary);
-            border-radius: var(--border-radius-md);
-            padding: 13px;
-            box-shadow: var(--shadow-card);
-            transition: var(--transition);
-        }
-        [data-theme="dark"] .card { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-        .card:hover { border-color: var(--color-border-secondary); }
-
-        .card-title {
-            font-size: 10px;
-            font-weight: 500;
-            color: var(--color-text-tertiary);
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            text-transform: uppercase;
-            letter-spacing: .05em;
-        }
-
-        .kpi-card {
-            background: var(--color-background-primary);
-            border: 0.5px solid var(--color-border-primary);
-            border-radius: var(--border-radius-md);
-            padding: 13px 15px;
-            box-shadow: var(--shadow-card);
-            transition: var(--transition);
-        }
-        .kpi-card:hover { border-color: var(--color-accent); }
-        .kpi-card.lead { 
-            border-left: 3px solid var(--color-accent); 
-            border-radius: 0 10px 10px 0; 
-            background: var(--color-accent-soft); 
-        }
-        .kpi-card h4 { 
-            font-size: 10px; 
-            color: var(--color-text-tertiary); 
-            font-weight: 500; 
-            margin-bottom: 5px; 
-            text-transform: uppercase; 
-        }
-        .kpi-card .val { 
-            font-size: 24px; 
-            font-weight: 500; 
-            font-family: var(--font-mono); 
-            letter-spacing: -0.02em; 
-            color: var(--color-text-primary); 
-        }
-        .kpi-card .val.big { font-size: 30px; }
-        [data-theme="light"] .kpi-card .val.big { color: #c2410c; }
-
-        /* ── Sidebar Components ── */
-        .sb-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-        .sb-logomark { width: 22px; height: 22px; background: #f97316; border-radius: 6px; flex-shrink: 0; }
-        .sb-logotext { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
-
-        .divider { height: 0.5px; background: var(--color-border-tertiary); margin: 4px 0; }
-        
-        .sb-section { display: flex; flex-direction: column; gap: 5px; }
-        .sb-label { 
-            font-size: 9px; 
-            font-weight: 500; 
-            color: var(--color-text-tertiary); 
-            text-transform: uppercase; 
-            letter-spacing: .08em; 
-        }
-        
-        .kpi-mini { 
-            padding: 9px; 
-            border-radius: 7px; 
-            background: var(--color-background-primary); 
-            border: 0.5px solid var(--color-border-tertiary); 
-        }
-        .kpi-mini-val { 
-            font-size: 17px; 
-            font-weight: 500; 
-            color: var(--color-text-primary); 
-            font-family: var(--font-mono); 
-            letter-spacing: -0.02em; 
-        }
-        .kpi-mini-lbl { font-size: 10px; color: var(--color-text-tertiary); margin-top: 2px; }
-
-        .rag-row { 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            padding: 7px 9px; 
-            border-radius: 7px; 
-            background: var(--color-background-primary); 
-            border: 0.5px solid var(--color-border-tertiary); 
-        }
-        .rag-row span { font-size: 11px; color: var(--color-text-secondary); }
-        .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
-        .dot-g { background: #1d9e75; }
-        .dot-a { background: #ef9f27; }
-        .dot-r { background: #e24b4a; }
-
-        .risk-badge { 
-            padding: 8px 10px; 
-            border-left: 3px solid #e24b4a; 
-            border-radius: 0 7px 7px 0; 
-            background: rgba(228,75,74,0.12); 
-        }
-        [data-theme="light"] .risk-badge { background: rgba(228,75,74,0.08); }
-        .risk-label { font-size: 9px; color: var(--color-text-tertiary); margin-bottom: 2px; }
-        .risk-val { font-size: 14px; font-weight: 500; color: #a32d2d; }
-        [data-theme="dark"] .risk-val { color: #f09595; }
-
-        /* ── Navigation ── */
-        .nav-tabs { display: flex; gap: 4px; }
-        .nav-tab { 
-            font-size: 11px;
-            padding: 4px 10px;
-            border-radius: 6px;
-            color: var(--color-text-tertiary);
-            cursor: pointer; 
-            border: 0.5px solid transparent; 
-            background: transparent; 
-            transition: var(--transition);
-        }
-        .nav-tab:hover { color: var(--color-text-primary); }
-        .nav-tab.active { 
-            background: var(--color-background-secondary); 
-            color: var(--color-text-primary); 
-            font-weight: 500; 
-            border-color: var(--color-border-primary); 
-        }
-        [data-theme="dark"] .nav-tab.active {
-            background: rgba(255,255,255,0.08);
-            border-color: rgba(255,255,255,0.15);
-        }
-        .tab-panel { display: none; }
-        .tab-panel.active { display: block; }
-
-        /* ── Insight banner ── */
-        .insight-banner { 
-            display: flex; 
-            align-items: flex-start; 
-            gap: 10px; 
-            padding: 11px 13px; 
-            border-radius: 0 10px 10px 0; 
-            background: var(--color-accent-soft); 
-            border-left: 3px solid var(--color-accent); 
-        }
-        [data-theme="light"] .insight-banner { 
-            border-top: 0.5px solid var(--color-border-primary); 
-            border-right: 0.5px solid var(--color-border-primary); 
-            border-bottom: 0.5px solid var(--color-border-primary); 
-        }
-        .insight-text { font-size: 11px; color: var(--color-text-secondary); line-height: 1.5; }
-        .btn { 
-            font-size: 11px; 
-            padding: 4px 12px; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            transition: var(--transition); 
-            border: 0.5px solid var(--color-border-primary); 
-            background: var(--color-background-primary); 
-            color: var(--color-text-primary);
-            font-weight: 500;
-        }
-        .btn:hover { background: var(--color-background-secondary); }
-        .btn-primary { 
-            background: var(--color-accent); 
-            color: white; 
-            border: none; 
-        }
-        .btn-primary:hover { opacity: 0.9; }
-
-        /* ── Grid ── */
-        .bento-grid {
-            display: grid;
-            grid-template-columns: repeat(12, 1fr);
-            gap: 20px;
-        }
-        .span-12 { grid-column: span 12; }
-        .span-8  { grid-column: span 8; }
-        .span-6  { grid-column: span 6; }
-        .span-4  { grid-column: span 4; }
-        .span-3  { grid-column: span 3; }
-
-        .kpi-strip { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 10px; }
-
-        /* ── Helpers ── */
-        .mono { font-family: var(--font-mono); }
-        .spinner { width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes bgPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-        
-        .badge { font-size: 9px; font-weight: 500; padding: 2px 7px; border-radius: 4px; display: inline-block; }
-        .badge-success { background: var(--color-background-success); color: var(--color-text-success); }
-        .badge-warning { background: var(--color-background-warning); color: var(--color-text-warning); }
-        .badge-danger { background: var(--color-background-danger); color: var(--color-text-danger); }
-        .badge-neutral { background: var(--color-background-secondary); color: var(--color-text-tertiary); }
-
-        .kpi-trend { display: inline-block; font-size: 9px; font-weight: 500; padding: 2px 7px; border-radius: 4px; margin-top: 5px; }
-        .trend-ok { background: var(--color-background-success); color: var(--color-text-success); }
-        .trend-warn { background: var(--color-background-warning); color: var(--color-text-warning); }
-        .trend-bad { background: var(--color-background-danger); color: var(--color-text-danger); }
-
-        /* Table styles */
-        table { width: 100%; border-collapse: collapse; font-size: 11px; }
-        th { text-align: left; padding: 8px; color: var(--color-text-tertiary); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 0.5px solid var(--color-border-tertiary); }
-        td { padding: 8px; border-bottom: 0.5px solid var(--color-border-tertiary); color: var(--color-text-secondary); }
-        tr:last-child td { border-bottom: none; }
-
-        .heatmap-table td { padding: 4px 2px; text-align: center; border: 1px solid var(--color-background-tertiary); border-radius: 4px; }
-        .h-over { background: var(--color-background-danger); color: var(--color-text-danger); }
-        .h-good { background: var(--color-background-success); color: var(--color-text-success); }
-        .h-bench { background: var(--color-background-warning); color: var(--color-text-warning); }
-        
-        /* ── Responsive Rules ── */
-        @media (max-width: 1024px) {
-            .app-shell { grid-template-columns: 1fr; }
-            .sidebar { display: none; }
-            .topbar { margin: 10px; }
-            .bento-grid { grid-template-columns: 1fr; gap: 10px; }
-            .span-12, .span-8, .span-6, .span-4, .span-3 { grid-column: span 1; }
-            .kpi-strip { grid-template-columns: 1fr; }
-            .content-area { padding: 10px; }
-        }
-
-        @media (max-width: 640px) {
-            .topbar { flex-direction: column; height: auto; gap: 10px; padding: 12px; }
-            .topbar-right { width: 100%; justify-content: space-between; }
-            .nav-tabs { overflow-x: auto; width: 100%; padding-bottom: 4px; }
-            .nav-tab { white-space: nowrap; }
-            
-            /* Table & Slider adjustments */
-            table { font-size: 10px; }
-            th, td { padding: 6px 4px; }
-            input[type="range"] { width: 60px !important; }
-        }
-
-        @media print { .no-print { display: none !important; } }
-    </style>
+    <script src="https://apis.google.com/js/api.js" async></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"
+            integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ"
+            crossorigin="anonymous" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"
+            integrity="sha384-M00GJNq2IplZCB3+JOJEl2H0un45ODvqJSSnIc4DvG8gPn8RX5ToITFXcv3AvOx5"
+            crossorigin="anonymous" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+            integrity="sha384-Yv5O+t3uE3hunW8uyrbpPW3iw6/5/Y7HitWJBLgqfMoA36NogMmy+8wWZMpn3HWc"
+            crossorigin="anonymous" defer></script>
+  <script type="module" crossorigin src="./assets/main-C0X_pMEI.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/jira-FmSVR2sr.js">
+  <link rel="stylesheet" crossorigin href="./assets/jira-B-CdHwnz.css">
 </head>
 <body>
 
-<div class="app-shell" id="master-report">
+<!-- AUTH GATE — landing page -->
+<div id="auth-gate" class="ct-gate ct-gate--page" style="display:flex;">
+
+    <!-- Sticky topbar -->
+    <div class="lp-topbar">
+        <div class="lp-brand">
+            <svg class="sb-logomark" width="30" height="30" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="22" height="22" rx="6" fill="var(--color-accent)"/>
+                <rect x="5" y="17.5" width="12" height="1.5" rx="0.75" fill="white"/>
+                <rect x="10.25" y="8.5" width="1.5" height="9" rx="0.75" fill="white"/>
+                <path d="M7.5 11 Q11 8 14.5 11" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+                <path d="M5.5 8.5 Q11 4.5 16.5 8.5" stroke="white" stroke-width="1.3" stroke-linecap="round" opacity="0.6"/>
+                <circle cx="11" cy="7.5" r="1.2" fill="white"/>
+            </svg>
+            <div>
+                <div class="lp-brand-name">Control Tower</div>
+                <div class="lp-brand-sub">Acquia Delivery</div>
+            </div>
+        </div>
+        <button id="btn-darkmode-lp" class="btn" onclick="toggleDarkMode()">Dark mode</button>
+    </div>
+
+    <!-- Hero -->
+    <section class="lp-hero">
+        <div class="lp-hero-left">
+            <span class="lp-chip">Acquia Delivery</span>
+            <h1 class="lp-hero-title">
+                One dashboard.<br>
+                Every project signal,<br>
+                <span style="color:var(--color-accent);">in real time.</span>
+            </h1>
+            <p class="lp-hero-desc">
+                Start from our pre-built template, connect your project sheet, and get live visibility into budget burn,
+                sprint health, and team capacity.
+            </p>
+            <div class="lp-signin-area">
+                <div id="auth-signin-btn" style="min-height:44px;"></div>
+                <p class="lp-signin-hint">Sign in with your <strong>@acquia.com</strong> Google account.</p>
+                <div id="auth-error" style="display:none; font-size:12px; color:var(--color-text-danger); max-width:340px; line-height:1.6; padding:8px 16px; border-radius:8px; background:var(--color-background-danger);"></div>
+            </div>
+        </div>
+
+        <div class="lp-hero-right" aria-hidden="true">
+            <div class="lp-diagram-box">
+                <div class="lp-diagram-label">How data flows</div>
+                <div class="lp-diagram-row">
+                    <div class="lp-diagram-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                    </div>
+                    <div>
+                        <div class="lp-diagram-text">Your Google Sheet</div>
+                        <div class="lp-diagram-sub">TimeEntries · Jira · ResourcePlan</div>
+                    </div>
+                </div>
+                <div class="lp-diagram-connector"></div>
+                <div class="lp-diagram-row lp-diagram-row--accent">
+                    <div class="lp-diagram-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>
+                    </div>
+                    <div>
+                        <div class="lp-diagram-text">Control Tower</div>
+                        <div class="lp-diagram-sub">aggregates + analyses live</div>
+                    </div>
+                </div>
+                <div class="lp-diagram-connector"></div>
+                <div class="lp-diagram-row">
+                    <div class="lp-diagram-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    </div>
+                    <div>
+                        <div class="lp-diagram-text">Your Dashboard</div>
+                        <div class="lp-diagram-sub">Budget · Sprint · Capacity · RAG</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="lp-hiw">
+        <div class="lp-section-inner">
+            <div class="lp-eyebrow">How it works</div>
+            <h2 class="lp-section-title">Up and running in 4 steps</h2>
+            <div class="lp-steps">
+                <div class="lp-step">
+                    <div class="lp-step-num">1</div>
+                    <div class="lp-step-title">Sign in</div>
+                    <div class="lp-step-blurb">Use your @acquia.com Google account. No separate signup required.</div>
+                </div>
+                <div class="lp-step">
+                    <div class="lp-step-num">2</div>
+                    <div class="lp-step-title">Get the template</div>
+                    <div class="lp-step-blurb">Copy the pre-built Google Sheet template — all tabs are pre-configured, just fill in your project data.</div>
+                </div>
+                <div class="lp-step">
+                    <div class="lp-step-num">3</div>
+                    <div class="lp-step-title">Connect your Sheet</div>
+                    <div class="lp-step-blurb">Pick it from Google Drive or paste the Sheet URL.</div>
+                </div>
+                <div class="lp-step">
+                    <div class="lp-step-num">4</div>
+                    <div class="lp-step-title">Your dashboard is live</div>
+                    <div class="lp-step-blurb">Budget burn, sprint health, and capacity — all live-synced every 15 minutes.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- What you get -->
+    <section class="lp-features">
+        <div class="lp-section-inner">
+            <div class="lp-eyebrow">What you get</div>
+            <h2 class="lp-section-title">Everything a delivery manager needs</h2>
+            <div class="lp-tiles">
+                <div class="card lp-tile">
+                    <div class="lp-tile-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                    </div>
+                    <div class="lp-tile-title">Budget &amp; EAC</div>
+                    <div class="lp-tile-desc">Track spend vs plan with live burn charts and a rolling Estimate at Completion forecast.</div>
+                </div>
+                <div class="card lp-tile">
+                    <div class="lp-tile-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    </div>
+                    <div class="lp-tile-title">Sprint Health</div>
+                    <div class="lp-tile-desc">Blocked tickets, aging issues, and SLA breaches surfaced before they become problems.</div>
+                </div>
+                <div class="card lp-tile">
+                    <div class="lp-tile-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </div>
+                    <div class="lp-tile-title">Capacity Planning</div>
+                    <div class="lp-tile-desc">Model leave-aware sprint capacity by role — know your real available hours before planning starts.</div>
+                </div>
+                <div class="card lp-tile">
+                    <div class="lp-tile-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </div>
+                    <div class="lp-tile-title">Data Integrity</div>
+                    <div class="lp-tile-desc">Unmapped tasks, unallocated spenders, and Jira hygiene gaps caught and flagged automatically.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="lp-footer">
+        Acquia Delivery · Control Tower · Internal use only
+    </footer>
+
+</div>
+
+<!-- ONBOARDING GATE — first-time user, no sheets linked -->
+<div id="onboarding-gate" class="ct-gate ct-gate--page" style="display:none;">
+
+    <!-- Topbar -->
+    <div class="lp-topbar">
+        <div class="lp-brand">
+            <svg class="sb-logomark" width="30" height="30" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="22" height="22" rx="6" fill="var(--color-accent)"/>
+                <rect x="5" y="17.5" width="12" height="1.5" rx="0.75" fill="white"/>
+                <rect x="10.25" y="8.5" width="1.5" height="9" rx="0.75" fill="white"/>
+                <path d="M7.5 11 Q11 8 14.5 11" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+                <path d="M5.5 8.5 Q11 4.5 16.5 8.5" stroke="white" stroke-width="1.3" stroke-linecap="round" opacity="0.6"/>
+                <circle cx="11" cy="7.5" r="1.2" fill="white"/>
+            </svg>
+            <div>
+                <div class="lp-brand-name">Control Tower</div>
+                <div class="lp-brand-sub">Acquia Delivery</div>
+            </div>
+        </div>
+        <div class="ob-topbar-meta">
+            <span class="ob-user-pill">Signed in as <span id="onboarding-user-email" class="ob-email"></span></span>
+            <a href="#" onclick="signOut(); return false;" class="ob-signout">Sign out</a>
+            <button id="btn-darkmode-ob" class="btn" onclick="toggleDarkMode()">Dark mode</button>
+        </div>
+    </div>
+
+    <!-- Hero -->
+    <section class="ob-page-hero">
+        <span class="lp-chip">Setup</span>
+        <h1 class="ob-page-hero-title">Connect your project sheet</h1>
+        <p class="lp-hero-desc">Pick up the template to get started, or connect a sheet you've already set up.</p>
+    </section>
+
+    <!-- Content body -->
+    <div class="ob-page-body">
+
+        <!-- Section A: New here -->
+        <div class="ob-page-section">
+            <div class="lp-eyebrow">New here?</div>
+            <p class="ob-page-section-desc">Start with the Control Tower template sheet — pre-configured with all required tabs and sample data.</p>
+            <a href="https://docs.google.com/spreadsheets/d/1Cptt0S_45wdRKYTYIuL7xkXm8KlP-8HwTQ-EOYp3icE/copy"
+               target="_blank" rel="noopener" class="btn btn-primary ob-template-btn">
+                Get the template
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+            <details class="ob-accordion">
+                <summary class="ob-accordion-summary">What needs to be updated?</summary>
+                <div class="ob-accordion-body">
+                    <div class="sg-row sg-row--mandatory">
+                        <div class="sg-step">1</div>
+                        <div><div class="sg-tab">Config <span class="badge sg-badge sg-badge--req">Required</span></div><div class="sg-fields">Set <code>project_name</code>, <code>budget</code>, <code>currency_symbol</code>.</div></div>
+                    </div>
+                    <div class="sg-row sg-row--mandatory">
+                        <div class="sg-step">2</div>
+                        <div><div class="sg-tab">ResourcePlan <span class="badge sg-badge sg-badge--req">Required</span></div><div class="sg-fields">Role · Person · Rate · week dates (Mon YYYY-MM-DD). Names must match TimeEntries.</div></div>
+                    </div>
+                    <div class="sg-row sg-row--mandatory">
+                        <div class="sg-step">3</div>
+                        <div><div class="sg-tab">Phases <span class="badge sg-badge sg-badge--req">Required</span></div><div class="sg-fields">Phase name + start date. Names must substring-match TimeEntries task descriptions.</div></div>
+                    </div>
+                    <div class="sg-row sg-row--mandatory">
+                        <div class="sg-step">4</div>
+                        <div><div class="sg-tab">TimeEntries <span class="badge sg-badge sg-badge--req">Required</span></div><div class="sg-fields">Paste timesheet export. Column order: Date · Person · Task · Phase · Hours · Billable.</div></div>
+                    </div>
+                    <div class="sg-row sg-row--mandatory">
+                        <div class="sg-step">5</div>
+                        <div><div class="sg-tab">Jira_Dump <span class="badge sg-badge sg-badge--req">Required</span></div><div class="sg-fields">Connect "Jira Cloud for Sheets" add-on, hourly sync. Add Warn/Over Hours formula columns.</div></div>
+                    </div>
+                    <div class="sg-row">
+                        <div class="sg-step sg-step--opt">6</div>
+                        <div><div class="sg-tab">SLA_Lookup <span class="badge sg-badge">Optional</span></div><div class="sg-fields">Story points → Warn/Over hours. Defaults provided — edit only if SLA thresholds differ.</div></div>
+                    </div>
+                    <div class="sg-row">
+                        <div class="sg-step sg-step--opt">7</div>
+                        <div><div class="sg-tab">Teamleaves <span class="badge sg-badge">Optional</span></div><div class="sg-fields">One row per leave day: Resource · Leave Date · Type. Use <code>Resource=ALL</code> for holidays.</div></div>
+                    </div>
+                    <div class="sg-row sg-row--auto">
+                        <div class="sg-step sg-step--auto">—</div>
+                        <div><div class="sg-tab">Spend_Analysis <span class="badge sg-badge sg-badge--auto">Auto</span></div><div class="sg-fields">Formula-driven. Add ticket keys in col A and story points in col B only.</div></div>
+                    </div>
+                </div>
+            </details>
+        </div>
+
+        <div class="ct-divider">or</div>
+
+        <!-- Section B: Already have a sheet -->
+        <div class="ob-page-section">
+            <div class="lp-eyebrow">Already have a sheet?</div>
+            <button id="btn-browse-drive" class="btn ob-drive-btn" onclick="browseDrive()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>
+                Browse My Google Drive
+            </button>
+            <div id="browse-drive-status" style="display:none; font-size:11px; color:var(--color-text-tertiary); text-align:center;"></div>
+
+            <div class="ct-divider">or paste URL</div>
+
+            <input id="onboarding-sheet-id" type="text" class="ct-input"
+                   placeholder="https://docs.google.com/spreadsheets/d/… or Sheet ID"
+                   onkeydown="if(event.key==='Enter') saveAndActivate(this.value.trim(), 'My Project')">
+            <button class="btn btn-primary ob-connect-btn"
+                    onclick="saveAndActivate(document.getElementById('onboarding-sheet-id').value.trim(), 'My Project')">
+                Connect Sheet →
+            </button>
+        </div>
+
+    </div>
+
+    <footer class="lp-footer">Acquia Delivery · Control Tower · Internal use only</footer>
+
+</div>
+
+<!-- CONFIG GATE — connected sheet's Config tab is missing project_name/budget -->
+<div id="config-gate" class="ct-gate" style="display:none;">
+    <div class="ct-modal" style="text-align:center; align-items:center;">
+        <div style="font-size:16px; font-weight:700; color:var(--color-text-primary);">Finish setting up your project</div>
+        <p style="font-size:13px; color:var(--color-text-tertiary); margin:0;">
+            The <code>Config</code> tab in your connected sheet needs <code>project_name</code> and <code>budget</code> set before the dashboard can load.
+        </p>
+        <a id="config-gate-link" href="#" target="_blank" rel="noopener" class="btn btn-primary">Open Config tab →</a>
+        <button class="btn btn-primary" onclick="fetchData()">Check again</button>
+        <button class="btn" onclick="openSheetPicker()" style="font-size:11px; color:var(--color-text-tertiary);">Switch project</button>
+        <button class="btn" onclick="signOut()" style="font-size:11px; color:var(--color-text-tertiary);">Sign out</button>
+    </div>
+</div>
+
+<div class="app-shell" id="master-report" style="display:none;">
     <!-- SIDEBAR -->
     <aside class="sidebar no-print">
         <div class="sb-logo">
-            <div class="sb-logomark"></div>
-            <span class="sb-logotext">Control Tower</span>
+            <svg class="sb-logomark" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="22" height="22" rx="6" fill="var(--color-accent)"/>
+                <rect x="5" y="17.5" width="12" height="1.5" rx="0.75" fill="white"/>
+                <rect x="10.25" y="8.5" width="1.5" height="9" rx="0.75" fill="white"/>
+                <path d="M7.5 11 Q11 8 14.5 11" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+                <path d="M5.5 8.5 Q11 4.5 16.5 8.5" stroke="white" stroke-width="1.3" stroke-linecap="round" opacity="0.6"/>
+                <circle cx="11" cy="7.5" r="1.2" fill="white"/>
+            </svg>
+            <div>
+                <span class="sb-logotext">Control Tower</span>
+                <div id="sb-project-name" style="font-size:11px; color:var(--color-text-tertiary); margin-top:1px; letter-spacing:0.02em;">No Project</div>
+            </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:5px; padding:6px 9px; border-radius:7px; background:var(--color-background-primary); border:0.5px solid var(--color-border-tertiary);">
+            <span style="font-family:var(--font-mono); font-size:11px; color:var(--color-text-tertiary);">€</span>
+            <input type="number" id="budgetLimit" value="251392" onblur="processData()" oninput="debouncedProcess()"
+                   style="flex:1; min-width:0; border:none; background:transparent; font-family:var(--font-mono); font-weight:500; font-size:12px; color:var(--color-text-primary); outline:none; padding:0;">
+            <span style="font-size:9px; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:0.05em; flex-shrink:0;">Budget</span>
         </div>
 
         <div class="divider"></div>
@@ -413,6 +338,7 @@
             <div class="sb-label">Financials</div>
             <div class="kpi-mini">
                 <div class="kpi-mini-val" id="side-kpi-burn">€0</div>
+                <span id="side-kpi-burn-delta" class="kpi-mini-delta"></span>
                 <div class="kpi-mini-lbl">Total burn</div>
             </div>
             <div class="kpi-mini">
@@ -425,18 +351,9 @@
             </div>
         </div>
 
-        <div class="divider"></div>
-
-        <div class="sb-section">
-            <div class="sb-label">Projection</div>
-            <div class="kpi-mini">
-                <div class="kpi-mini-val" id="side-kpi-runway">0 wks</div>
-                <div class="kpi-mini-lbl">Budget runway</div>
-            </div>
-            <div class="kpi-mini">
-                <div class="kpi-mini-val" id="side-kpi-finish">—</div>
-                <div class="kpi-mini-lbl">Projected finish</div>
-            </div>
+        <div style="display:none;">
+            <span id="side-kpi-runway">0 wks</span>
+            <span id="side-kpi-finish">—</span>
         </div>
 
         <div class="divider"></div>
@@ -449,30 +366,50 @@
         <header class="topbar no-print">
             <div class="topbar-left">
                 <nav class="nav-tabs">
-                    <button class="nav-tab active" id="nav-capacity" onclick="switchTab('capacity')">Capacity</button>
-                    <button class="nav-tab" onclick="switchTab('program')">Program</button>
-                    <button class="nav-tab" onclick="switchTab('jira-high')">Jira — High Level</button>
-                    <button class="nav-tab" onclick="switchTab('jira-sprint')">Jira — Sprint View</button>
+                    <button class="nav-tab active" data-tab="program" onclick="switchTab('program')">Overview</button>
+                    <button class="nav-tab" data-tab="jira-sprint" onclick="switchTab('jira-sprint')">Sprint</button>
+                    <button class="nav-tab" data-tab="jira-high" onclick="switchTab('jira-high')">Delivery</button>
+                    <button class="nav-tab" data-tab="capacity" id="nav-capacity" onclick="switchTab('capacity')">Planning</button>
                 </nav>
             </div>
             <div class="topbar-right">
                 <div style="display: flex; align-items: center; gap: 8px;">
+                    <div id="as-of-week" style="display:none; align-items:center; gap:4px; padding:4px 10px; border-radius:var(--border-radius-md); border:0.5px solid var(--color-border-tertiary); font-size:11px; color:var(--color-text-secondary); font-family:var(--font-mono);">
+                        Wk of <span id="as-of-week-label">—</span>
+                    </div>
                     <div id="last-synced" style="display:none; align-items:center; gap:6px; padding:4px 10px; border-radius:var(--border-radius-md); border:0.5px solid var(--color-border-tertiary); font-size:11px; color:var(--color-text-secondary); font-family:var(--font-mono);">
                         <div id="bg-fetch-dot" style="display:none;width:6px;height:6px;border-radius:50%;background:#10b981;animation:bgPulse 1s infinite;"></div>
                         Synced <span id="sync-time">—</span>
                     </div>
 
-                    <div class="budget-field" style="display:flex; align-items:center; gap:6px; padding:4px 10px; border-radius:var(--border-radius-md); border:0.5px solid var(--color-border-secondary); background:var(--color-background-secondary);">
-                        <label style="font-size:11px; color:var(--color-text-secondary); text-transform:none; font-weight:400;">Budget</label>
-                        <div style="display:flex; align-items:center; gap:2px;">
-                            <span style="font-family:var(--font-mono); font-weight:500; color:var(--color-text-tertiary); font-size:12px;">€</span>
-                            <input type="number" id="budgetLimit" value="251392" onblur="processData()" oninput="debouncedProcess()" style="width:72px; border:none; background:transparent; font-family:var(--font-mono); font-weight:500; font-size:12px; color:var(--color-text-primary); outline:none; padding:0;">
+                    <div class="alert-bell-wrap" id="alert-bell-wrap">
+                        <button id="alert-bell" class="btn btn-icon" onclick="toggleAlertTray()" title="Alerts" aria-expanded="false" aria-haspopup="true">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                            <span id="alert-badge" class="alert-badge" style="display:none;">0</span>
+                        </button>
+                        <div id="alert-tray" class="alert-tray" style="display:none;">
+                            <div class="alert-tray-header">
+                                <span>Alerts</span>
+                                <button class="btn" style="font-size:10px; padding:2px 8px;" onclick="dismissAllAlerts()">Dismiss all</button>
+                            </div>
+                            <div id="alert-tray-list"></div>
+                            <details class="alert-history-section">
+                                <summary class="alert-history-summary">History <button class="btn" style="font-size:9px;padding:1px 6px;margin-left:6px;" onclick="event.preventDefault();clearAlertHistory()">Clear</button></summary>
+                                <div id="alert-history-list"></div>
+                            </details>
                         </div>
                     </div>
-
-                    <button id="btn-darkmode" onclick="toggleDarkMode()" class="btn" title="Toggle Dark Mode">Dark mode</button>
-                    <button id="btn-export" class="btn" onclick="exportPDF()">Export PDF</button>
+                    <button id="btn-push" class="btn" onclick="togglePushNotifications()" title="Toggle push notifications" style="display:none; font-size:11px;">Push Off</button>
+                    <button id="btn-darkmode" onclick="toggleDarkMode()" class="btn btn-icon" title="Toggle Dark Mode">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    </button>
+                    <button id="btn-export" class="btn" onclick="exportPDF()" title="Export PDF">PDF</button>
                     <button id="btn-sync" class="btn btn-primary" onclick="fetchData()">Sync</button>
+                    <button id="btn-switch-project" class="btn" onclick="openSheetPicker()" style="font-size:11px;">Switch Project</button>
+                    <div id="auth-user" style="display:none; align-items:center; gap:8px; padding:4px 10px; border-radius:var(--border-radius-md); border:0.5px solid var(--color-border-tertiary); font-size:11px; color:var(--color-text-secondary);">
+                        <span id="auth-user-name"></span>
+                        <button onclick="signOut()" class="btn" style="padding:2px 8px; font-size:10px;">Sign out</button>
+                    </div>
                 </div>
             </div>
         </header>
@@ -489,9 +426,9 @@
             <div id="dashboard" style="display:none;">
 
                 <!-- ══ PROGRAM TAB ══════════════════════════════════ -->
-                <div id="tab-program" class="tab-panel">
+                <div id="tab-program" class="tab-panel active">
                     <div class="bento-grid">
-                        
+
                         <!-- Insight & Stats Row -->
                         <div class="insight-banner span-12" id="smart-insight-card">
                             <div class="insight-icon"></div>
@@ -527,18 +464,18 @@
 
                         <!-- Main Charts -->
                         <div class="card span-8">
-                            <div class="card-title">📈 Cumulative Burn vs. Budget</div>
-                            <div style="height:300px; width:100%;"><canvas id="chart-burn"></canvas></div>
+                            <div class="card-title">Cumulative Burn vs. Budget</div>
+                            <div style="height:240px; width:100%;"><canvas id="chart-burn"></canvas></div>
                         </div>
                         <div class="card span-4">
-                            <div class="card-title">📅 Predictive Roll-off</div>
-                            <div id="rolloff-container" style="max-height:300px; overflow-y:auto;">
+                            <div class="card-title">Predictive Roll-off</div>
+                            <div id="rolloff-container" style="max-height:240px; overflow-y:auto;">
                                 <div id="rolloff-list"></div>
                             </div>
                         </div>
 
                         <div class="card span-12">
-                            <div class="card-title">📉 Phase Performance & Cost Breakdown</div>
+                            <div class="card-title">Phase Performance & Cost Breakdown</div>
                             <div class="table-responsive">
                                 <table>
                                     <thead>
@@ -551,6 +488,7 @@
                                             <th style="text-align:right;">Phase EAC (€)</th>
                                             <th style="text-align:right;">Completion</th>
                                             <th style="text-align:right;">Status</th>
+                                            <th></th>
                                         </tr>
                                     </thead>
                                     <tbody id="phase-merged-body"></tbody>
@@ -559,43 +497,38 @@
                         </div>
 
                         <div class="card span-6">
-                            <div class="card-title">⚖️ Non-Billable vs. Billable Time</div>
-                            <div style="height:260px;width:100%;"><canvas id="chart-bench"></canvas></div>
+                            <div class="card-title">Non-Billable vs. Billable Time</div>
+                            <div style="height:210px;width:100%;"><canvas id="chart-bench"></canvas></div>
                         </div>
                         <div class="card span-6">
-                            <div class="card-title">📐 Planned vs. Actual Hours (S-Curve)</div>
-                            <div style="height:260px;width:100%;"><canvas id="chart-scurve"></canvas></div>
+                            <div class="card-title">Planned vs. Actual Hours (S-Curve)</div>
+                            <div style="height:210px;width:100%;"><canvas id="chart-scurve"></canvas></div>
                         </div>
 
                         <div class="card span-4">
-                            <div class="card-title">🚨 Variance Flags</div>
+                            <div class="card-title">Variance Flags</div>
                             <div id="red-flags"></div>
                         </div>
 
                         <div class="card span-8">
-                            <div class="card-title">📊 Timesheet Compliance Trend</div>
-                            <div style="height:200px;width:100%;"><canvas id="chart-compliance"></canvas></div>
+                            <div class="card-title">Timesheet Compliance Trend</div>
+                            <div style="height:170px;width:100%;"><canvas id="chart-compliance"></canvas></div>
                         </div>
 
                         <div class="card span-12">
-                            <div class="card-title">👤 Resource Load by Name (h/wk)</div>
-                            <div style="height:260px;width:100%;"><canvas id="chart-resource-load"></canvas></div>
-                        </div>
-
-                        <div class="card span-12">
-                            <div class="card-title">🗂️ Spend by Phase — Actual vs Planned (€)</div>
-                            <div style="height:320px;width:100%;"><canvas id="chart-phase"></canvas></div>
+                            <div class="card-title">Resource Load by Name (h/wk)</div>
+                            <div style="height:210px;width:100%;"><canvas id="chart-resource-load"></canvas></div>
                         </div>
 
                         <div class="card span-6">
                             <div class="card-title">
-                                💸 Top 5 Spenders
+                                Top 5 Spenders
                                 <select id="spenderWeekSelect" class="nav-tab no-print" style="font-size:10px; padding:2px 6px;" onchange="renderTopSpenders(this.value)"></select>
                             </div>
                             <div id="top-spenders"></div>
                         </div>
                         <div class="card span-6">
-                            <div class="card-title">🏁 Milestone Tracker</div>
+                            <div class="card-title">Milestone Tracker</div>
                             <div id="ms-summary" style="font-size:11px; color:var(--muted); margin-bottom:12px;"></div>
                             <div class="table-responsive">
                                 <table>
@@ -606,8 +539,8 @@
                         </div>
 
                         <div class="card span-12" id="card-data-integrity" style="display:none;">
-                            <div class="card-title">🔍 Data Integrity & Mapping Alerts</div>
-                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                            <div class="card-title">Data Integrity & Mapping Alerts</div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px;">
                                 <div>
                                     <div class="sb-label" style="margin-bottom:8px;">Unmapped Tasks (TimeEntries)</div>
                                     <div id="unmapped-tasks-list" style="max-height:150px; overflow-y:auto; font-size:11px; color:var(--muted);"></div>
@@ -616,14 +549,18 @@
                                     <div class="sb-label" style="margin-bottom:8px;">Jira Hygiene</div>
                                     <div id="jira-hygiene-alerts" style="font-size:11px; color:var(--muted);"></div>
                                 </div>
+                                <div>
+                                    <div class="sb-label" style="margin-bottom:8px;">Unallocated Spenders</div>
+                                    <div id="unallocated-spenders-list" style="max-height:150px; overflow-y:auto; font-size:11px; color:var(--muted);"></div>
+                                </div>
                             </div>
                         </div>
 
                         <div class="card span-12">
                             <div class="card-title">
-                                🔥 Resource Heatmap
+                                Resource Heatmap
                                 <div style="display:flex; align-items:center; gap:16px; font-weight:400;">
-                                    <input type="text" id="heatmap-search" placeholder="Search resource…" oninput="if(globalData._people && globalData._weeks) renderHeatmap(globalData._people, Object.keys(globalData._weeks).sort())" style="padding:4px 10px; border-radius:6px; border:1px solid var(--border); font-size:11px;">
+                                    <input type="text" id="heatmap-search" placeholder="Search resource…" aria-label="Search resources" oninput="if(globalData._people && globalData._weeks) renderHeatmap(globalData._people, Object.keys(globalData._weeks).sort())" style="padding:4px 10px; border-radius:6px; border:1px solid var(--border); font-size:11px;">
                                     <div style="display:flex; gap:8px; font-size:10px; color:var(--muted);">
                                         <span><span class="rag-dot" style="background:var(--danger)"></span> Spend > Alloc</span>
                                         <span><span class="rag-dot" style="background:var(--success)"></span> Match (±10%)</span>
@@ -638,33 +575,34 @@
                     </div>
                 </div> <!-- End Program Tab -->
 
-                <!-- ══ JIRA HIGH LEVEL TAB ══════════════════════════ -->
+                <!-- ══ DELIVERY TAB ════════════════════════════════ -->
                 <div id="tab-jira-high" class="tab-panel">
                     <div class="bento-grid">
-                        <div class="kpi-strip span-12" id="hl-phase-cards"></div>
+                        <!-- Sprint focus banner -->
+                        <div id="hl-focus-card" class="span-12" style="display:none;"></div>
 
-                        <div class="card span-12">
-                            <div class="card-title">Pipeline Flow</div>
-                            <div class="jira-sprint-bar" id="hl-status-bar" style="display:flex; gap:24px; padding:16px; border:1px solid var(--border); border-radius:12px;">
-                                <div class="jsb-stat"><div class="jsb-val" id="hl-stat-qual" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Qual</div></div>
-                                <div class="jsb-stat"><div class="jsb-val" id="hl-stat-dev" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Dev</div></div>
-                                <div class="jsb-stat"><div class="jsb-val" id="hl-stat-uat" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">UAT</div></div>
-                                <div class="jsb-stat"><div class="jsb-val" id="hl-stat-done" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Done</div></div>
-                            </div>
-                        </div>
+                        <!-- Phase detail cards -->
+                        <div class="card span-4" id="hl-phase-qual"></div>
+                        <div class="card span-4" id="hl-phase-dev"></div>
+                        <div class="card span-4" id="hl-phase-uat"></div>
 
+                        <!-- Sprint distribution -->
+                        <div class="card span-12" id="hl-sprint-dist"></div>
+
+                        <!-- Velocity + Category -->
                         <div class="card span-8">
-                            <div class="card-title">Velocity Trends (Points per Month)</div>
-                            <div style="height:300px; width:100%;"><canvas id="hl-chart-velocity"></canvas></div>
+                            <div class="card-title">Delivery Velocity — Focus Points per Sprint</div>
+                            <div style="height:240px; width:100%;"><canvas id="hl-chart-velocity"></canvas></div>
                         </div>
                         <div class="card span-4">
-                            <div class="card-title">Category Distribution</div>
-                            <div style="height:300px; width:100%;"><canvas id="hl-chart-categories"></canvas></div>
+                            <div class="card-title">Status Distribution</div>
+                            <div style="height:240px; width:100%;"><canvas id="hl-chart-categories"></canvas></div>
                         </div>
 
+                        <!-- Story points by assignee -->
                         <div class="card span-12">
-                            <div class="card-title">Jira Spend Analysis (Actual Hours vs Story Points)</div>
-                            <div style="height:350px; width:100%;"><canvas id="hl-chart-spend"></canvas></div>
+                            <div class="card-title">Story Points by Assignee (Top 10)</div>
+                            <div style="height:230px; width:100%;"><canvas id="hl-chart-spend"></canvas></div>
                         </div>
                     </div>
                 </div>
@@ -673,7 +611,7 @@
                     <div class="bento-grid">
                         <div class="card span-12" style="display:flex; align-items:center; justify-content:space-between; padding:12px 20px;">
                             <div style="display:flex; align-items:center; gap:16px;">
-                                <select id="sprint-selector" onchange="jRenderSprintView()" class="nav-tab active" style="font-size:13px; padding:6px 12px;"></select>
+                                <select id="sprint-selector" onchange="jRenderSprintView()" class="nav-tab active" aria-label="Sprint" style="font-size:13px; padding:6px 12px;"></select>
                                 <span id="sv-sprint-dates" class="mono" style="font-size:12px; color:var(--color-text-tertiary);"></span>
                             </div>
                             <div id="sv-sprint-points"></div>
@@ -696,21 +634,22 @@
                                 <div class="jsb-stat"><div class="jsb-val" id="jsb-blocked" style="font-size:18px; font-weight:700; color:var(--color-text-danger);">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--color-text-tertiary); text-transform:uppercase;">Blocked</div></div>
                                 <div class="jsb-stat"><div class="jsb-val" id="jsb-reopened" style="font-size:18px; font-weight:700; color:var(--color-text-warning);">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--color-text-tertiary); text-transform:uppercase;">Re-opened</div></div>
                                 <div class="jsb-stat"><div class="jsb-val" id="jsb-creep" style="font-size:18px; font-weight:700; color:var(--color-text-danger);">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--color-text-tertiary); text-transform:uppercase;">Creep</div></div>
+                                <div class="jsb-stat"><div class="jsb-val" id="jsb-aging" style="font-size:18px; font-weight:700; color:var(--color-text-warning);">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--color-text-tertiary); text-transform:uppercase;">Aging</div></div>
                             </div>
                         </div>
 
                         <div class="card span-8">
                             <div class="card-title">Sprint Burndown (Points)</div>
-                            <div style="height:280px; width:100%;"><canvas id="sv-chart-burndown"></canvas></div>
+                            <div style="height:230px; width:100%;"><canvas id="sv-chart-burndown"></canvas></div>
                         </div>
                         <div class="card span-4">
                             <div class="card-title">Risk Labels Distribution</div>
-                            <div style="height:280px; width:100%;"><canvas id="sv-chart-labels"></canvas></div>
+                            <div style="height:230px; width:100%;"><canvas id="sv-chart-labels"></canvas></div>
                         </div>
 
                         <div class="card span-12">
                             <div class="card-title">
-                                ⚠️ At-Risk Queue
+                                At-Risk Queue
                                 <span id="at-risk-count" style="display:none;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--st-bad-bg);color:var(--st-bad-text);"></span>
                             </div>
                             <div class="table-responsive">
@@ -725,7 +664,7 @@
                             <div class="card-title">Sprint Issue Detail</div>
                             <div class="table-responsive">
                                 <table>
-                                    <thead><tr><th>Key</th><th>Status</th><th>Summary</th><th>Assignee</th><th>Points</th></tr></thead>
+                                    <thead><tr><th>Key</th><th>Status</th><th>Summary</th><th>Assignee</th><th>Points</th><th></th></tr></thead>
                                     <tbody id="sv-issues-body"></tbody>
                                 </table>
                             </div>
@@ -734,14 +673,14 @@
                 </div>
 
                 <!-- ══ CAPACITY & PLANNING TAB ══════════════════════ -->
-                <div id="tab-capacity" class="tab-panel active">
+                <div id="tab-capacity" class="tab-panel">
                     <div class="bento-grid">
                         <div class="card span-12">
                             <div class="card-title">Sprint Capacity Planner</div>
                             <div style="display:flex; align-items:flex-end; gap:24px; margin-bottom:24px;">
                                 <div style="flex:1;">
                                     <label style="display:block; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">Planning Sprint</label>
-                                    <select id="cap-sprint-selector" class="nav-tab active" style="width:100%; font-size:13px; padding:6px 12px;" onchange="renderCapacity()"></select>
+                                    <select id="cap-sprint-selector" class="nav-tab active" aria-label="Sprint" style="width:100%; font-size:13px; padding:6px 12px;" onchange="renderCapacity()"></select>
                                 </div>
                                 <div style="flex:2;">
                                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
@@ -795,1578 +734,54 @@
     </div> <!-- End Main Body -->
 </div> <!-- End App Shell -->
 
-<script>
-    Chart.register(ChartDataLabels);
-    ChartDataLabels.defaults.display = false;
+<div id="sheet-picker-modal" style="display:none; position:fixed; inset:0; z-index:199; background:rgba(0,0,0,0.55); align-items:center; justify-content:center;">
+  <div class="ct-modal">
+    <div style="font-size:16px; font-weight:700; color:var(--color-text-primary);">Switch Project</div>
+
+    <div id="sheet-picker-list" style="overflow-y:auto; max-height:200px; display:flex; flex-direction:column; gap:4px;"></div>
+    <div id="sheet-picker-error" style="display:none; font-size:11px; color:var(--color-text-danger); padding:4px 0;"></div>
+
+    <div class="ct-divider">add project</div>
+
+    <div style="display:flex; gap:8px; align-items:center;">
+      <input id="new-project-name" type="text" class="ct-input" placeholder="New project name…"
+             onkeydown="if(event.key==='Enter') createProjectFromTemplate()">
+      <button id="btn-new-project" class="btn btn-primary" onclick="createProjectFromTemplate()" style="white-space:nowrap; flex-shrink:0;">+ New Project</button>
+    </div>
+    <div id="new-project-error" style="display:none; font-size:11px; color:var(--color-text-danger); padding:4px 0;"></div>
+
+    <button id="btn-browse-drive-modal" class="btn" style="padding:10px 14px; font-size:13px; font-weight:500; display:flex; align-items:center; justify-content:center; gap:8px; border:1px solid var(--color-border-primary);"
+            onclick="browseDrive('modal')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>
+      Browse My Google Drive
+    </button>
+    <div id="browse-drive-status-modal" style="display:none; font-size:11px; color:var(--color-text-tertiary); text-align:center;"></div>
+
+    <div class="ct-divider">or paste url</div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <input id="sheet-id-input" type="text" class="ct-input" placeholder="Paste Sheet URL or ID…" style="font-family:var(--font-mono); font-size:12px;"
+             onkeydown="if(event.key==='Enter') saveAndActivate(this.value.trim(), 'My Project')">
+      <button class="btn btn-primary" onclick="saveAndActivate(document.getElementById('sheet-id-input').value.trim(), 'My Project')" style="white-space:nowrap; flex-shrink:0;">Add</button>
+    </div>
+    <button onclick="closeModal('sheet-picker-modal')" class="btn" style="font-size:11px; align-self:center; color:var(--color-text-tertiary);">Cancel</button>
+  </div>
+</div>
+
+<div id="note-modal" style="display:none; position:fixed; inset:0; z-index:199; background:rgba(0,0,0,0.55); align-items:center; justify-content:center;">
+  <div class="ct-modal" style="width:420px; padding:24px; gap:12px;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <strong id="note-modal-title" style="font-size:14px;"></strong>
+      <button class="btn-icon" onclick="closeNoteModal()" style="font-size:18px; line-height:1;">×</button>
+    </div>
+    <div id="note-modal-list" style="overflow-y:auto; display:flex; flex-direction:column; gap:8px; min-height:32px; max-height:240px;"></div>
+    <textarea id="note-modal-input" rows="3" placeholder="Add a note…" style="resize:vertical; font-size:13px; padding:8px 10px; border-radius:6px; border:1px solid var(--color-border-primary); background:transparent; color:inherit; font-family:inherit;"></textarea>
+    <div id="note-modal-error" style="display:none; font-size:12px; color:var(--color-text-danger);"></div>
+    <div style="display:flex; gap:8px; justify-content:flex-end;">
+      <button class="btn" onclick="closeNoteModal()" style="font-size:12px;">Cancel</button>
+      <button id="note-modal-submit" class="btn btn-primary" onclick="submitNote()" style="font-size:12px;">Save</button>
+    </div>
+  </div>
+</div>
 
-    // ── Global Chart.js Styles (Dribbble-inspired) ──────────────────
-    Chart.defaults.elements.line.tension = 0.4;
-    Chart.defaults.elements.line.borderWidth = 3;
-    Chart.defaults.elements.line.fill = true;
-    Chart.defaults.elements.point.radius = 0;
-    Chart.defaults.elements.point.hoverRadius = 6;
-    Chart.defaults.font.family = "'DM Sans', sans-serif";
-    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15, 23, 42, 0.9)';
-    Chart.defaults.plugins.tooltip.padding = 12;
-    Chart.defaults.plugins.tooltip.cornerRadius = 8;
-    Chart.defaults.plugins.tooltip.titleFont = { size: 12, weight: '700' };
-    Chart.defaults.plugins.tooltip.bodyFont = { size: 12 };
-
-    // ── CONFIG — single source of truth for all constants ────────────────────
-    const CONFIG = {
-        API_URL:        "https://script.google.com/macros/s/AKfycbx4OQ81fkE5LHkAG-yqAo2h37NC_9OoZrcIQ_MEAKx0uMjoeG6Ws8-E3VmEnc75Bo0l/exec",
-        RATE_FALLBACK:  100,
-        THRESH_OVER:    40,
-        THRESH_GOOD:    30,
-        VARIANCE_FACTOR:1.2,
-        VARIANCE_UNDER: 0.8,
-        ACTIVE_DAYS:    14,
-        CHART_COLORS:   ['#f97316', '#ea580c', '#fb923c', '#fdba74', '#1d9e75', '#e24b4a', '#ef9f27'],
-        SYNC_INTERVAL_MS: 15 * 60 * 1000,
-        // Fix #2: Added missing constant used by aging table badge threshold
-        AGING_THRESHOLD_WORK_HRS: 16,
-        SLA_GRACE_HOURS: 1,
-        // ── Dev SLA thresholds — WORKING hours allowed per story point band ──
-        DEV_SLA: {
-            1: { warn: 2,   over: 2   },
-            2: { warn: 4,   over: 4   },
-            3: { warn: 8,   over: 12  },
-            5: { warn: 16,  over: 24  },
-            8: { warn: 24,  over: 24  },
-            default: { warn: 16, over: 24 }
-        },
-        // ── Working hours configuration ───────────────────────────────────────
-        WORK_HOURS: {
-            startHour: 10,
-            endHour:   18,
-            holidays: new Set([
-                '2026-01-01',  // New Year's Day
-                '2026-01-26',  // Republic Day
-                '2026-03-03',  // Holi
-                '2026-03-20',  // Eid-ul-Fitr
-                '2026-05-01',  // Maharashtra Day
-                '2026-05-27',  // Eid-al-Adha
-                '2026-08-15',  // Independence Day
-                '2026-08-28',  // Raksha Bandhan
-                '2026-09-04',  // Janmashtami
-                '2026-09-14',  // Ganesh Chaturthi
-                '2026-10-02',  // Mahatma Gandhi Jayanti
-                '2026-11-09',  // Diwali (Observed)
-                '2026-11-10',  // Govardhan Puja
-                '2026-11-24',  // Gurunanak Jayanti
-                '2026-12-25',  // Christmas
-                '2027-01-01'   // New Year's Day 2027
-            ])
-        }
-    };
-
-    let globalData = { actuals:[], plan:[], rawPhases:[], milestones:[], unknownTasks:[] };
-    let chartRefs  = {};
-    let sparkRefs  = {};
-    let _escEl     = null;
-    let _debounce  = null;
-    let _syncStatus = { lastSuccess: true, error: null };
-
-    // ── workingHoursElapsed_(start, end, person) ──────────────────────────────────────
-    function workingHoursElapsed_(start, end, person = null) {
-        if (!start || !end || isNaN(start) || isNaN(end)) return 0;
-        if (end <= start) return 0;
-
-        const { startHour, endHour, holidays } = CONFIG.WORK_HOURS;
-        const workDayHours = endHour - startHour;
-        const personLeaves = person ? (globalData._processedLeaves ? globalData._processedLeaves.get(person) : null) : null;
-
-        function isWorkDay(d) {
-            const dow = d.getDay();
-            if (dow === 0 || dow === 6) return false;
-            const y = d.getFullYear();
-            const m = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            const dateStr = `${y}-${m}-${day}`;
-            if (holidays.has(dateStr)) return false;
-            if (personLeaves && personLeaves.has(dateStr)) return false;
-            return true;
-        }
-
-        let totalHours = 0;
-        let s = new Date(start);
-        let e = new Date(end);
-
-        if (isWorkDay(s)) {
-            const dayStart = new Date(s); dayStart.setHours(startHour, 0, 0, 0);
-            const dayEnd   = new Date(s); dayEnd.setHours(endHour, 0, 0, 0);
-            // Fix #3: use explicit getTime() instead of fragile Math.max/min on Date objects
-            const effStartMs = Math.max(s.getTime(), dayStart.getTime());
-            const effEndMs   = Math.min(e.getTime(), dayEnd.getTime());
-            if (effEndMs > effStartMs) totalHours += (effEndMs - effStartMs) / 3600000;
-        }
-
-        if (s.toDateString() === e.toDateString()) return totalHours;
-
-        let cursor = new Date(s);
-        cursor.setDate(cursor.getDate() + 1);
-        cursor.setHours(0, 0, 0, 0);
-        const eStartOfDay = new Date(e); eStartOfDay.setHours(0, 0, 0, 0);
-
-        while (cursor < eStartOfDay) {
-            if (isWorkDay(cursor)) totalHours += workDayHours;
-            cursor.setDate(cursor.getDate() + 1);
-        }
-
-        if (isWorkDay(e)) {
-            const dayStart = new Date(e); dayStart.setHours(startHour, 0, 0, 0);
-            const dayEnd   = new Date(e); dayEnd.setHours(endHour, 0, 0, 0);
-            const effStartMs = Math.max(eStartOfDay.getTime(), dayStart.getTime());
-            const effEndMs   = Math.min(e.getTime(), dayEnd.getTime());
-            if (effEndMs > effStartMs) totalHours += (effEndMs - effStartMs) / 3600000;
-        }
-
-        return totalHours;
-    }
-
-    /* ── DARK MODE ─────────────────────────────────────────── */
-    function applyDarkMode(dark) {
-        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-        const btn = document.getElementById('btn-darkmode');
-        if (btn) btn.textContent = dark ? 'Light mode' : 'Dark mode';
-        
-        const tickCol  = dark ? '#94a3b8' : '#64748b';
-        const gridCol  = dark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
-        Chart.defaults.color        = tickCol;
-        Chart.defaults.borderColor  = gridCol;
-        Chart.defaults.font.family  = "'DM Sans', sans-serif";
-        Chart.defaults.font.size    = 10;
-
-        if (globalData._weeks) {
-            const budget = parseFloat(document.getElementById('budgetLimit').value) || 0;
-            updateUI(
-                globalData._weeks, globalData._people, 
-                globalData._phasesActual, globalData._phasesPlanned, 
-                globalData._phaseOrder, globalData._phaseNameMap, 
-                globalData._totals, globalData._eacRem, budget
-            ); 
-        }
-        if (globalData.jiraIssues && globalData.jiraIssues.length) {
-            renderJiraTab();
-        }
-    }
-
-    function toggleDarkMode() {
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        const next   = !isDark;
-        applyDarkMode(next);
-        try { localStorage.setItem('pct_dark_mode', next ? '1' : '0'); } catch(e) {}
-    }
-
-    (function initDarkMode() {
-        let saved = '0';
-        try { saved = localStorage.getItem('pct_dark_mode') || '0'; } catch(e) {}
-        if (saved === '0' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            saved = '1';
-        }
-        applyDarkMode(saved === '1');
-    })();
-
-    function debouncedProcess() { clearTimeout(_debounce); _debounce = setTimeout(processData, 350); }
-
-    function esc(str) {
-        if (!_escEl) _escEl = document.createElement('div');
-        _escEl.textContent = String(str ?? '');
-        return _escEl.innerHTML;
-    }
-
-    function safeText(id, val) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = val;
-    }
-
-    function safeHTML(id, html) {
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = html;
-    }
-
-    function fmt(n) { return Math.round(n).toLocaleString(); }
-
-    function formatDateForUI(iso) {
-        if (!iso) return '—';
-        const p = String(iso).split('T')[0].split('-');
-        if (p.length === 3) return new Date(+p[0], +p[1]-1, +p[2]).toLocaleDateString('en-US',{month:'short',day:'numeric'});
-        return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'});
-    }
-
-    function toLocalISO(d) {
-        var y = d.getFullYear();
-        var m = String(d.getMonth()+1); if(m.length<2) m='0'+m;
-        var day = String(d.getDate()); if(day.length<2) day='0'+day;
-        return y+'-'+m+'-'+day;
-    }
-
-    function parseDateSafe(str) {
-        if (!str) return null;
-        const s = String(str).trim();
-        const months = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
-        let d = null;
-        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
-            const p = s.split('-');
-            d = new Date(+p[0], +p[1]-1, +p[2]);
-        }
-        else if (/^\d{1,2}-[A-Za-z]{3}-\d{2}$/.test(s)) {
-            const p   = s.split('-');
-            const day = parseInt(p[0], 10);
-            const mon = months[p[1].charAt(0).toUpperCase() + p[1].slice(1).toLowerCase()];
-            const yr  = 2000 + parseInt(p[2], 10);
-            if (mon !== undefined) d = new Date(yr, mon, day);
-        }
-        else if (/^\d{1,2}-[A-Za-z]{3}-\d{4}$/.test(s)) {
-            const p   = s.split('-');
-            const day = parseInt(p[0], 10);
-            const mon = months[p[1].charAt(0).toUpperCase() + p[1].slice(1).toLowerCase()];
-            const yr  = parseInt(p[2], 10);
-            if (mon !== undefined) d = new Date(yr, mon, day);
-        }
-        else {
-            const parts = s.split('-');
-            if (parts.length === 2 && months[parts[0]] !== undefined)
-                d = new Date(new Date().getFullYear(), months[parts[0]], parseInt(parts[1],10));
-        }
-        if (!d || isNaN(d.getTime())) d = new Date(s);
-        if (!d || isNaN(d.getTime())) return null;
-        return toLocalISO(d);
-    }
-
-    function getMonday(dateStr) {
-        if (!dateStr) return null;
-        const d = new Date(dateStr);
-        if (isNaN(d)) return null;
-        const day = d.getDay();
-        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-        const mon = new Date(d); mon.setDate(diff);
-        return toLocalISO(mon);
-    }
-
-    function resolveLatestSprint(issues) {
-        if (!Array.isArray(issues)) return issues;
-        issues.forEach(issue => {
-            const raw = (issue.sprint || '').trim();
-            if (!raw || !raw.includes(';')) return; 
-            const parts = raw.split(';').map(p => p.trim()).filter(Boolean);
-            if (parts.length < 2) return;
-            // Fix #4: renamed inner arrow param from 's' to 'sp' to avoid shadowing
-            const num = sp => { 
-                const m = sp.match(/(\d+)/g); 
-                return m ? parseInt(m[m.length - 1], 10) : 0; 
-            };
-            const latest = parts.reduce((best, cur) => num(cur) >= num(best) ? cur : best, parts[0]);
-            issue.sprint = latest;
-        });
-        return issues;
-    }
-
-    async function fetchData() {
-        const debug  = document.getElementById('debug-info');
-        const loader = document.getElementById('loader');
-        const btnSync = document.getElementById('btn-sync');
-        const bgDot   = document.getElementById('bg-fetch-dot');
-        const isBackground = document.getElementById('dashboard')?.style.display !== 'none';
-        debug.style.display = 'none';
-        // Fix #12b: show pulsing dot on background refreshes, full loader only on first load
-        if (isBackground) {
-            if (bgDot) bgDot.style.display = 'block';
-        } else {
-            loader.style.display = 'flex';
-            document.getElementById('dashboard').style.display = 'none';
-        }
-        if (btnSync) { btnSync.disabled = true; btnSync.textContent = '⏳ Syncing…'; }
-        try {
-            const res  = await fetch(CONFIG.API_URL);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
-            if (data.error) throw new Error(data.error);
-            globalData = {
-                actuals:      Array.isArray(data.actuals)      ? data.actuals      : [],
-                plan:         Array.isArray(data.plan)         ? data.plan         : [],
-                rawPhases:    Array.isArray(data.rawPhases)    ? data.rawPhases    : [],
-                milestones:   Array.isArray(data.milestones)   ? data.milestones   : [],
-                unknownTasks: Array.isArray(data.unknownTasks) ? data.unknownTasks : [],
-                jiraSummary:  Array.isArray(data.jiraSummary)  ? data.jiraSummary  : [],
-                jiraIssues:   Array.isArray(data.jiraIssues)   ? data.jiraIssues   : [],
-                jiraConfig:   (data.jiraConfig && typeof data.jiraConfig === 'object') ? data.jiraConfig : {},
-                spendAnalysis: Array.isArray(data.spendAnalysis) ? data.spendAnalysis : [],
-                leaves:        (data.leaves && typeof data.leaves === 'object') ? data.leaves : {},
-            };
-            resolveLatestSprint(globalData.jiraIssues);
-            _lastSyncedAt = Date.now();
-            _syncStatus = { lastSuccess: true, error: null };
-            updateSyncTimestamp_();
-            resetCountdown_();
-            // Fix #12: register background auto-sync interval (was referenced in docs but never wired up)
-            if (!window._autoSyncHandle) {
-                window._autoSyncHandle = setInterval(fetchData, CONFIG.SYNC_INTERVAL_MS);
-            }
-            processData();
-            renderJiraTab();
-        } catch(e) {
-            _syncStatus = { lastSuccess: false, error: e.message };
-            loader.style.display = 'none';
-            debug.style.display  = 'block';
-            debug.innerHTML = `<div class="error-box"><h3>⚠️ Connection Error</h3><p>${esc(e.message)}</p><button class="btn btn-primary" onclick="fetchData()" style="margin-top:10px;">🔄 Retry</button></div>`;
-        } finally {
-            if (btnSync) { btnSync.disabled = false; btnSync.textContent = '🔄 Sync'; }
-            const bgDotEl = document.getElementById('bg-fetch-dot');
-            if (bgDotEl) bgDotEl.style.display = 'none';
-        }
-    }
-
-    let _lastSyncedAt     = null;
-    let _countdownSecs    = 15 * 60;
-    let _countdownHandle  = null;
-
-    function updateSyncTimestamp_() {
-        const now = new Date();
-        const timeEl = document.getElementById('sync-time');
-        const syncEl = document.getElementById('last-synced');
-        if (timeEl) {
-            if (_syncStatus.lastSuccess) {
-                timeEl.textContent = now.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
-                timeEl.style.color = 'inherit';
-            } else {
-                timeEl.textContent = 'Sync Failed';
-                timeEl.style.color = 'var(--danger)';
-            }
-        }
-        if (syncEl) syncEl.style.display = 'inline-flex';
-    }
-
-    function resetCountdown_() {
-        _countdownSecs = Math.floor(CONFIG.SYNC_INTERVAL_MS / 1000);
-        if (_countdownHandle) clearInterval(_countdownHandle);
-        _countdownHandle = setInterval(function() {
-            _countdownSecs = Math.max(0, _countdownSecs - 1);
-        }, 1000);
-    }
-
-    function processData() {
-        globalData._processedLeaves = new Map();
-        if (globalData.leaves && typeof globalData.leaves === 'object') {
-            Object.keys(globalData.leaves).forEach(person => {
-                const dates = globalData.leaves[person];
-                if (Array.isArray(dates)) {
-                    globalData._processedLeaves.set(person, new Set(dates));
-                }
-            });
-        }
-
-        const weeks={}, people={}, roles={};
-        const totals={ burn:0, hours:0, bill:0, nb:0 };
-        const budget = parseFloat(document.getElementById('budgetLimit').value) || 0;
-
-        const phaseSet  = new Set();
-        const phaseOrder = [];
-        globalData.rawPhases.forEach(ph => {
-            const n = String(ph||'').trim();
-            if(n && !phaseSet.has(n.toLowerCase())){ phaseSet.add(n.toLowerCase()); phaseOrder.push(n); }
-        });
-        phaseOrder.push('__other__');
-        phaseSet.add('__other__');
-
-        const sortedCandidates = [...phaseOrder].filter(p => p !== '__other__').sort((a,b) => b.length - a.length);
-        function norm(s){ return String(s||'').toLowerCase().replace(/[\s\-_\/]+/g,' ').trim(); }
-
-        function matchPlanPhase(raw) {
-            const r = norm(raw);
-            if(!r) return '__other__';
-            for(const c of sortedCandidates){ if(norm(c)===r) return c.toLowerCase(); }
-            for(const c of sortedCandidates){
-                const nc = norm(c);
-                if(r.startsWith(nc)||nc.startsWith(r)) return c.toLowerCase();
-            }
-            return '__other__';
-        }
-
-        const taskPhaseCache = {};
-        function matchTaskPhase(taskRaw) {
-            const key = String(taskRaw||'').trim();
-            if(taskPhaseCache[key] !== undefined) return taskPhaseCache[key];
-            const sepIdx = key.search(/\s*-\s+/);
-            const toTry  = [];
-            if(sepIdx > 0) toTry.push(key.substring(0, sepIdx).trim());
-            toTry.push(key);
-            for(const attempt of toTry){
-                const a = norm(attempt);
-                for(const c of sortedCandidates){ if(norm(c)===a){ taskPhaseCache[key]=c.toLowerCase(); return c.toLowerCase(); } }
-                for(const c of sortedCandidates){ if(a.startsWith(norm(c))){ taskPhaseCache[key]=c.toLowerCase(); return c.toLowerCase(); } }
-                for(const c of sortedCandidates){ if(norm(c).startsWith(a)){ taskPhaseCache[key]=c.toLowerCase(); return c.toLowerCase(); } }
-            }
-            taskPhaseCache[key]='__other__'; return '__other__';
-        }
-
-        const phasesActual  = {};   
-        const phasesPlanned = {};   
-
-        globalData.actuals.forEach(r => {
-            const rawD = parseDateSafe(r.Date);
-            if (!rawD) return;
-            const w = getMonday(rawD);
-            const h = parseFloat(r['Time in Hours'])||0;
-            const s = parseFloat(r.Subtotal)||0;
-            const isBill = parseFloat(r.Rate)>0;
-            const role = (r.Role || 'Unassigned').trim();
-
-            if (!weeks[w]) weeks[w]={burn:0,act:0,plan:0,bill:0,nb:0,planPeople:new Set(),actPeople:new Set()};
-            weeks[w].burn+=s; weeks[w].act+=h;
-            weeks[w].actPeople.add(r.Person);
-            if(isBill) weeks[w].bill+=h; else weeks[w].nb+=h;
-            
-            if(s>0){
-                const phKey = matchTaskPhase(r['Task/Deliverable']);
-                phasesActual[phKey] = (phasesActual[phKey]||0) + s;
-            }
-            if(!people[r.Person]) people[r.Person]={weeks:{},billableWeeks:{},actualLast:null,plannedFirst:null,plannedLast:null,rate:parseFloat(r.Rate)||0};
-            people[r.Person].weeks[w]=(people[r.Person].weeks[w]||0)+h;
-            if(isBill) people[r.Person].billableWeeks[w]=(people[r.Person].billableWeeks[w]||0)+h;
-            if(!people[r.Person].actualLast||new Date(rawD)>new Date(people[r.Person].actualLast)) people[r.Person].actualLast=rawD;
-            
-            if(!roles[role]) roles[role] = {weeks:{}};
-            roles[role].weeks[w] = (roles[role].weeks[w]||0) + h;
-
-            totals.burn+=s; totals.hours+=h;
-            if(isBill) totals.bill+=h; else totals.nb+=h;
-        });
-
-        let eacRem=0;
-        const today = new Date();
-        const todayStr = toLocalISO(today);
-        const thisMon  = getMonday(todayStr);
-        const dayOfWeek = today.getDay();
-        const elapsedWorkDays = dayOfWeek === 0 ? 5 : (dayOfWeek === 6 ? 5 : dayOfWeek);
-        const prorataFactor = elapsedWorkDays / 5;
-
-        globalData.plan.forEach(p => {
-            const parsedP = parseDateSafe(p.dateStr);
-            if (!parsedP) return;
-            const w = getMonday(parsedP);
-            if(!people[p.person]) people[p.person]={weeks:{},billableWeeks:{},actualLast:null,plannedFirst:null,plannedLast:null,rate:p.plannedRate||CONFIG.RATE_FALLBACK};
-            let planH = p.planH || 0;
-            if (w === thisMon && planH > 0) planH = planH * prorataFactor;
-            if(p.planH>0){
-                if(!people[p.person].plannedFirst||w<people[p.person].plannedFirst) people[p.person].plannedFirst=w;
-                if(!people[p.person].plannedLast ||w>people[p.person].plannedLast)  people[p.person].plannedLast=w;
-            }
-            if (!weeks[w]) weeks[w]={burn:0,act:0,plan:0,bill:0,nb:0,planPeople:new Set(),actPeople:new Set()};
-            weeks[w].plan += planH;
-            if(p.planH > 0) weeks[w].planPeople.add(p.person);
-            if(parsedP > todayStr) eacRem += (p.planH || 0) * (people[p.person].rate||p.plannedRate||CONFIG.RATE_FALLBACK);
-            if(p.planH>0){
-                const phKey  = matchPlanPhase(p.phase||'');
-                const rate   = people[p.person]?.rate || p.plannedRate || CONFIG.RATE_FALLBACK;
-                phasesPlanned[phKey] = (phasesPlanned[phKey]||0) + ((p.planH || 0) * rate);
-            }
-        });
-
-        globalData._roles = roles;
-        const activeKeys = new Set([...Object.keys(phasesActual), ...Object.keys(phasesPlanned)]);
-        const orderedKeys = phaseOrder
-            .filter(n => n !== '__other__')
-            .map(n => n.toLowerCase())
-            .filter(k => activeKeys.has(k));
-        if(activeKeys.has('__other__')) orderedKeys.push('__other__');
-        const phaseNameMap = {};
-        phaseOrder.filter(n => n !== '__other__').forEach(n => { phaseNameMap[n.toLowerCase()] = n; });
-        phaseNameMap['__other__'] = 'Others';
-
-        globalData._phasesActual  = phasesActual;
-        globalData._phasesPlanned = phasesPlanned;
-        globalData._phaseOrder    = orderedKeys;
-        globalData._phaseNameMap  = phaseNameMap;
-        globalData._people = people;
-        globalData._weeks  = weeks;
-        globalData._totals = totals;
-        globalData._eacRem = eacRem;
-
-        updateUI(weeks, people, phasesActual, phasesPlanned, orderedKeys, phaseNameMap, totals, eacRem, budget);
-    }
-
-    function updateUI(weeks, people, phasesActual, phasesPlanned, phaseOrder, phaseNameMap, totals, eacRem, budget) {
-        const loader = document.getElementById('loader');
-        if (loader) loader.style.display = 'none';
-        const dashboard = document.getElementById('dashboard');
-        if (dashboard) dashboard.style.display = 'block';
-
-        const sortedLabels = Object.keys(weeks).sort();
-        const sortedW      = [...sortedLabels].reverse();
-        const weekCount    = Math.max(sortedLabels.length,1);
-        const remain  = budget - totals.burn;
-        const eac     = totals.burn + (eacRem || 0);
-        const benchPct= totals.hours>0 ? (totals.nb  /totals.hours)*100 : 0;
-        const effPct  = totals.hours>0 ? (totals.bill/totals.hours)*100 : 0;
-
-        safeText('side-kpi-burn',   `€${fmt(totals.burn)}`);
-        safeText('side-kpi-remain', `€${fmt(remain)}`);
-        safeText('side-kpi-eac',    `€${fmt(eac)}`);
-
-        safeText('kpi-velo',  `${(totals.hours/weekCount).toFixed(1)}h/wk`);
-        safeText('kpi-bench', `${benchPct.toFixed(0)}%`);
-
-        // Velocity status: compare leave-adjusted allocated vs actual spend week-on-week
-        const todayStr = toLocalISO(new Date());
-        const thisMon  = getMonday(todayStr);
-        const recentWks = sortedLabels.filter(l => l < thisMon).slice(-4);
-        let veloStatus = 'ok', veloLabel = '▴ Optimum';
-        if (recentWks.length >= 2) {
-            const allocVsSpend = recentWks.map(w => {
-                const alloc = weeks[w]?.plan || 0;
-                const spend = weeks[w]?.act  || 0;
-                return alloc > 0 ? spend / alloc : 1;
-            });
-            const avgRatio = allocVsSpend.reduce((a,b)=>a+b,0) / allocVsSpend.length;
-            const lastRatio = allocVsSpend[allocVsSpend.length-1];
-            if (lastRatio > 1.1) { veloStatus = 'bad'; veloLabel = '▴ Up (Over)'; }
-            else if (lastRatio < 0.8) { veloStatus = 'warn'; veloLabel = '▾ Down (Under)'; }
-            else { veloStatus = 'ok'; veloLabel = '✓ Optimum'; }
-        }
-        setTrend('kpi-velo-trend', veloStatus, veloLabel);
-        setTrend('kpi-bench-trend', benchPct<15?'ok':benchPct<25?'warn':'bad', benchPct<15?'✓ Low':benchPct<25?'▴ Moderate':'▴ High');
-
-        // Budget Burn Rate: weekly burn vs weekly budget allocation
-        const weeklyBudgetAlloc = budget / Math.max(weekCount, 1);
-        const recentBurns = sortedLabels.filter(l => l < thisMon).slice(-4).map(l => weeks[l]?.burn || 0);
-        const avgBurn = recentBurns.length ? recentBurns.reduce((a,b)=>a+b,0)/recentBurns.length : 0;
-        const burnRateRatio = weeklyBudgetAlloc > 0 ? avgBurn / weeklyBudgetAlloc : 0;
-        safeText('kpi-eff', `€${fmt(avgBurn)}/wk`);
-        setTrend('kpi-eff-trend', burnRateRatio > 1.1 ? 'bad' : burnRateRatio > 0.9 ? 'warn' : 'ok',
-            burnRateRatio > 1.1 ? '▴ Accelerating' : burnRateRatio > 0.9 ? '▾ On Budget' : '▾ Decelerating');
-
-        const futureWks=[...new Set(globalData.plan.filter(p=>new Date(parseDateSafe(p.dateStr))>new Date()).map(p=>getMonday(parseDateSafe(p.dateStr))).filter(Boolean))].length;
-        const confLabel=futureWks===0?'No Data':futureWks<4?'Low':futureWks<8?'Medium':'High';
-        const confType =futureWks===0?'bad':futureWks<4?'warn':futureWks<8?'warn':'ok';
-        safeText('kpi-conf', confLabel);
-        setTrend('kpi-conf-trend', confType, `${futureWks} wks planned`);
-
-        let defaultW   = null;
-        const thisIdx = sortedLabels.indexOf(thisMon);
-        if (thisIdx > 0) defaultW = sortedLabels[thisIdx - 1];
-        else if (thisIdx === 0) defaultW = sortedLabels[0];
-        else {
-            const pastWks = sortedLabels.filter(l => l < thisMon);
-            defaultW = pastWks.length ? pastWks[pastWks.length - 1] : (sortedLabels[0] || null);
-        }
-
-        const weekOptHtml = sortedW.map(w=>`<option value="${w}">${w === thisMon ? w + ' (Current)' : w}</option>`).join('');
-        ['spenderWeekSelect'].forEach(id=>{
-            const el=document.getElementById(id); 
-            if(el) { el.innerHTML=weekOptHtml; if(defaultW) el.value = defaultW; }
-        });
-
-        renderRAGSidebar(weeks, people, totals, budget, eac, sortedLabels);
-        generateSmartInsights(totals, budget, eac, weeks, sortedLabels);
-        initVelocitySimulation(weeks, totals, eacRem);
-        renderExceptions(weeks, people, defaultW);
-        renderPhaseMerged(phasesActual, phasesPlanned, phaseOrder, phaseNameMap);
-        renderOperationalCharts(weeks, sortedLabels);
-        renderCharts(weeks, phasesActual, phasesPlanned, phaseOrder, phaseNameMap, budget, sortedLabels);
-        renderTopSpenders(defaultW);
-        renderMilestones();
-        renderDataIntegrity();
-        renderRolloff(people);
-        renderSparklines(weeks, sortedLabels);
-        renderHeatmap(people, sortedLabels);
-    }
-
-    function renderPhaseMerged(actuals, planned, order, nameMap) {
-        const body = document.getElementById('phase-merged-body');
-        if (!body) return;
-        body.innerHTML = order.map(key => {
-            const act  = actuals[key] || 0;
-            const plan = planned[key] || 0;
-            const eac  = Math.max(act, plan);
-            const delta = plan - act;
-            const pct  = plan > 0 ? (act / plan) * 100 : 0;
-            let status = 'trend-ok', statusLbl = 'On Track';
-            if (act > plan * 1.1) { status = 'trend-bad'; statusLbl = 'Overrun'; }
-            else if (act > plan * 0.9) { status = 'trend-warn'; statusLbl = 'Near Cap'; }
-            return `<tr>
-                <td><strong>${nameMap[key] || key}</strong></td>
-                <td style="text-align:right;" class="mono">€${fmt(act)}</td>
-                <td style="text-align:right;" class="mono">€${fmt(plan)}</td>
-                <td style="text-align:right;" class="mono" style="color:${delta<0?'var(--color-text-danger)':'inherit'}">€${fmt(delta)}</td>
-                <td style="text-align:right;" class="mono">${plan>0?pct.toFixed(0):0}%</td>
-                <td style="text-align:right;" class="mono">€${fmt(eac)}</td>
-                <td style="text-align:right;">
-                    <div style="font-size:10px; margin-bottom:2px;">${pct.toFixed(0)}%</div>
-                    <div style="background:var(--border-subtle); border-radius:3px; height:4px; overflow:hidden;"><div style="width:${Math.min(pct,100)}%; background:${pct > 100 ? 'var(--danger)' : 'var(--accent)'}; height:4px;"></div></div>
-                </td>
-                <td style="text-align:right;"><span class="kpi-trend ${status}">${statusLbl}</span></td>
-            </tr>`;
-        }).join('');
-    }
-
-    function renderOperationalCharts(weeks, sortedLabels) {
-        if (chartRefs['compliance']) { chartRefs['compliance'].destroy(); }
-        if (chartRefs['resource-load']) { chartRefs['resource-load'].destroy(); }
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        const tc = isDark ? '#94a3b8' : '#64748b';
-        const gc = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
-
-        const ctxComp = document.getElementById('chart-compliance')?.getContext('2d');
-        if (ctxComp) {
-            const data = sortedLabels.map(l => {
-                const plan = weeks[l]?.planPeople?.size || 0;
-                const act  = weeks[l]?.actPeople?.size  || 0;
-                return plan > 0 ? Math.round((act / plan) * 100) : 0;
-            });
-            const barColors = data.map(v => v >= 80 ? 'rgba(16,185,129,0.8)' : v >= 50 ? 'rgba(245,158,11,0.8)' : 'rgba(239,68,68,0.8)');
-            chartRefs['compliance'] = new Chart(ctxComp, {
-                type: 'bar',
-                data: { labels: sortedLabels.map(l => l.substring(5)), datasets: [{ label: 'Submission %', data, backgroundColor: barColors, borderRadius: 3 }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { y: { min: 0, max: 100, grid: { color: gc }, ticks: { color: tc, callback: v => v + '%' } }, x: { grid: { display: false }, ticks: { color: tc } } } }
-            });
-        }
-
-        const ctxRes = document.getElementById('chart-resource-load')?.getContext('2d');
-        if (ctxRes && globalData._people) {
-            const people = globalData._people;
-            const recentWks = sortedLabels.slice(-6);
-            const names = Object.keys(people).sort();
-            const totHours = names.map(n => recentWks.reduce((s, w) => s + (people[n].weeks[w] || 0), 0));
-            const palette = names.map((_, i) => `hsla(${(i * 47) % 360}, 65%, 55%, 0.85)`);
-            chartRefs['resource-load'] = new Chart(ctxRes, {
-                type: 'bar',
-                data: { labels: names, datasets: [{ label: 'Hours (last 6 wks)', data: totHours, backgroundColor: palette, borderRadius: 3 }] },
-                options: { maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { x: { grid: { color: gc }, ticks: { color: tc } }, y: { grid: { display: false }, ticks: { color: tc, font: { size: 10 } } } } }
-            });
-        }
-    }
-
-    function setTrend(id,type,label){
-        const el=document.getElementById(id); if(!el) return;
-        el.innerHTML=`<span class="kpi-trend trend-${type}">${label}</span>`;
-    }
-
-    function generateSmartInsights(totals, budget, eac, weeks, sortedLabels) {
-        const textEl = document.getElementById('smart-insight-text');
-        const tagEl  = document.getElementById('insight-type-tag');
-        if (!textEl || sortedLabels.length === 0) return;
-        
-        const todayIsoS = toLocalISO(new Date());
-        const pastWksS = sortedLabels.filter(l => l <= todayIsoS && (weeks[l]?.burn || 0) > 0);
-        const recent = pastWksS.slice(-4).map(l => weeks[l]?.burn || 0);
-        const runRate = recent.length > 0 ? recent.reduce((a,b)=>a+b,0)/recent.length : 0;
-        const runway = runRate > 0 ? (budget - totals.burn) / runRate : 0;
-        
-        let insight = "";
-        let tag = "Program insight";
-        let tagColor = "var(--color-text-info)";
-        let tagBg = "var(--color-background-info)";
-
-        if (eac > budget) {
-            tag = "Budget warning";
-            tagColor = "var(--color-text-danger)";
-            tagBg = "var(--color-background-danger)";
-            insight = `EAC exceeds the €${fmt(budget/1000)}k cap by <strong>€${fmt(eac - budget)}</strong>. At the current €${fmt(runRate/1000)}k/wk burn rate, budget will be exhausted in <strong>${runway.toFixed(1)} weeks</strong>.`;
-        } else if (runway < 6) {
-            tag = "Runway alert";
-            tagColor = "var(--color-text-warning)";
-            tagBg = "var(--color-background-warning)";
-            insight = `Budget runway is <strong>${runway.toFixed(1)} weeks</strong>. Current burn rate is €${fmt(runRate/1000)}k/wk against €${fmt(budget/1000)}k cap.`;
-        } else {
-            insight = `Program is healthy with EAC well within the €${fmt(budget/1000)}k cap. Project finish is currently projected for <strong>${document.getElementById('side-kpi-finish').textContent}</strong>.`;
-        }
-
-        textEl.innerHTML = insight;
-        if (tagEl) {
-            tagEl.textContent = tag;
-            tagEl.style.color = tagColor;
-            tagEl.style.background = tagBg;
-        }
-    }
-
-    function runVelocitySimulation(val) {
-        safeText('sim-velo-val', val);
-        if (!globalData._totals || !globalData._weeks) return;
-        const budget = parseFloat(document.getElementById('budgetLimit').value) || 0;
-        const currentBurn = globalData._totals.burn;
-        const today = new Date();
-        const remainingWeeks = [...new Set(globalData.plan.filter(p => parseDateSafe(p.dateStr) && new Date(parseDateSafe(p.dateStr)) > today).map(p => getMonday(parseDateSafe(p.dateStr))))].length;
-        const simRem = remainingWeeks * val * CONFIG.RATE_FALLBACK;
-        const simEAC = currentBurn + simRem;
-        const simBuffer = budget - simEAC;
-        safeText('sim-eac-val', `€${fmt(simEAC)}`);
-        safeText('sim-buffer-val', `€${fmt(simBuffer)}`);
-        const bufferEl = document.getElementById('sim-buffer-val');
-        if (bufferEl) bufferEl.style.color = simBuffer < 0 ? 'var(--danger)' : 'var(--success)';
-    }
-
-    function initVelocitySimulation(weeks, totals, eacRem) {
-        const weekCount = Object.keys(weeks).length || 1;
-        const avgVelo = Math.round(totals.hours / weekCount);
-        const slider = document.getElementById('sim-velo-slider');
-        if (slider) { slider.value = avgVelo; runVelocitySimulation(avgVelo); }
-    }
-
-    function renderRAGSidebar(weeks, people, totals, budget, eac, sortedLabels) {
-        const today = new Date();
-        const burnRatio = budget > 0 ? totals.burn / budget : 0;
-        const budgetRAG = burnRatio < 0.7 ? 'green' : (burnRatio < 0.9 ? 'amber' : 'red');
-        const futureWks = [...new Set(globalData.plan.filter(p => new Date(parseDateSafe(p.dateStr)) > today).map(p => getMonday(parseDateSafe(p.dateStr))).filter(Boolean))].length;
-        const schedRAG = futureWks > 4 ? 'green' : (futureWks > 0 ? 'amber' : 'red');
-        const latestW = sortedLabels[sortedLabels.length-1];
-        const planRows = globalData.plan.filter(p => getMonday(p.dateStr) === latestW && p.planH > 0);
-        const missing = planRows.filter(p => (people[p.person]?.weeks[latestW] || 0) === 0).length;
-        const resRAG = (planRows.length === 0 || missing / planRows.length < 0.1) ? 'green' : (missing / planRows.length < 0.3 ? 'amber' : 'red');
-        const delivRAG = eac <= budget ? 'green' : (eac <= budget * 1.1 ? 'amber' : 'red');
-
-        const labels = {Budget: budgetRAG, Schedule: schedRAG, Resources: resRAG, Delivery: delivRAG};
-        const ragHtml = Object.entries(labels).map(([lbl, rag]) => {
-            const dotCls = rag === 'green' ? 'dot-g' : (rag === 'amber' ? 'dot-a' : 'dot-r');
-            return `<div class="rag-row"><span>${lbl}</span><div class="dot ${dotCls}"></div></div>`;
-        }).join('');
-        safeHTML('rag-sidebar', ragHtml);
-
-        const todayIso = toLocalISO(new Date());
-        const pastWeeks = sortedLabels.filter(l => l <= todayIso && (weeks[l]?.burn || 0) > 0);
-        const recentPast = pastWeeks.slice(-4).map(l => weeks[l]?.burn || 0);
-        const runRate = recentPast.length > 0 ? recentPast.reduce((a,b)=>a+b,0)/recentPast.length : 0;
-        const runway = runRate > 0 ? ((budget - totals.burn) / runRate).toFixed(1) : '∞';
-        safeText('side-kpi-runway', `${runway} wks`);
-
-        const lastPlanDate = globalData.plan.reduce((max, p) => { const d = parseDateSafe(p.dateStr); return (d && (!max || d > max)) ? d : max; }, null);
-        safeText('side-kpi-finish', lastPlanDate ? formatDateForUI(lastPlanDate) : '—');
-
-        if (eac > budget) {
-            safeHTML('eac-over-cap', `<span style="color:var(--color-text-danger)">+€${fmt(eac - budget)} over cap</span>`);
-        } else {
-            safeText('eac-over-cap', '');
-        }
-
-        const riskScore = (burnRatio > 0.9 ? 40 : (burnRatio > 0.7 ? 20 : 0)) + (eac > budget ? 40 : (eac > budget * 0.95 ? 20 : 0)) + (futureWks < 4 ? 20 : 0);
-        const riskLevel = riskScore >= 60 ? 'Critical' : (riskScore >= 30 ? 'Moderate' : 'Low');
-        const riskColor = riskLevel === 'Critical' ? 'var(--color-text-danger)' : (riskLevel === 'Moderate' ? 'var(--color-text-warning)' : 'var(--color-text-success)');
-
-        safeHTML('pm-risk-badge', `<div class="risk-label">Overall risk</div>
-            <div class="risk-val" style="color:${riskColor}">${riskLevel}</div>`);
-    }
-    function renderSparklines(weeks, sortedLabels) {
-        const last6=sortedLabels.slice(-6);
-        drawSparkline('spark-velo', last6.map(l=>weeks[l]?.act||0), '#3b82f6');
-    }
-    function drawSparkline(id, data, color) {
-        const canvas=document.getElementById(id); if(!canvas) return;
-        const par = canvas.parentElement; if (par.offsetWidth === 0) return;
-        if(sparkRefs[id]){sparkRefs[id].destroy();}
-        canvas.width=par.offsetWidth; canvas.height=28;
-        sparkRefs[id]=new Chart(canvas,{
-            type:'line', data:{labels:data.map((_,i)=>i),datasets:[{data,borderColor:color,borderWidth:1.5,fill:true,backgroundColor:color+'22',tension:0.4,pointRadius:0}]},
-            options:{responsive:false,animation:false,plugins:{legend:{display:false},datalabels:{display:false}},scales:{x:{display:false},y:{display:false}}}
-        });
-    }
-
-    function renderHeatmap(people, allWeeks) {
-        const table = document.getElementById('heatmap-body'); if (!table) return;
-        const search = (document.getElementById('heatmap-search')?.value || '').toLowerCase();
-        // Build per-person per-week allocated hours from plan
-        const planMap = {};
-        (globalData.plan || []).forEach(p => {
-            const w = getMonday(parseDateSafe(p.dateStr));
-            if (!w) return;
-            if (!planMap[p.person]) planMap[p.person] = {};
-            planMap[p.person][w] = (planMap[p.person][w] || 0) + (p.planH || 0);
-        });
-        let html = `<thead><tr><th>Resource</th>${allWeeks.map(w=>`<th>${w.substring(5)}</th>`).join('')}</tr></thead><tbody>`;
-        const sortedPeople = Object.keys(people).sort().filter(p => !search || p.toLowerCase().includes(search));
-        for (const p of sortedPeople) {
-            html += `<tr><td><strong>${esc(p)}</strong></td>`;
-            for (const w of allWeeks) {
-                const spend = people[p].weeks[w] || 0;
-                const alloc = (planMap[p] && planMap[p][w]) || 0;
-                let cls = '', display = spend > 0 ? spend.toFixed(1) : '–';
-                if (alloc > 0) {
-                    const ratio = spend / alloc;
-                    if (ratio > 1.1) cls = 'h-over';
-                    else if (ratio >= 0.9) cls = 'h-good';
-                    else if (spend > 0) cls = 'h-bench';
-                    display = `${spend.toFixed(1)}/${alloc.toFixed(1)}`;
-                } else if (spend > 0) {
-                    cls = 'h-bench';
-                }
-                html += `<td class="${cls}" title="Spend: ${spend.toFixed(1)}h | Alloc: ${alloc.toFixed(1)}h">${display}</td>`;
-            }
-            html += `</tr>`;
-        }
-        html += '</tbody>'; table.innerHTML = html;
-    }
-
-    function renderExceptions(weeks, people, latest) {
-        const flags = document.getElementById('red-flags');
-        if (!flags) return;
-        flags.innerHTML = '';
-        const actuallyBilled = new Set();
-        globalData.actuals.forEach(r => { if (getMonday(parseDateSafe(r.Date)) === latest && (parseFloat(r['Time in Hours'])||0) > 0) actuallyBilled.add((r.Person||'').trim().toLowerCase()); });
-        globalData.plan.forEach(p => {
-            if (getMonday(p.dateStr) !== latest || !(p.planH > 0)) return;
-            const key = (p.person||'').trim().toLowerCase();
-            const billAct = people[p.person]?.billableWeeks?.[latest] || 0;
-            if (actuallyBilled.has(key)) {
-                if (billAct > p.planH * CONFIG.VARIANCE_FACTOR || billAct < p.planH * CONFIG.VARIANCE_UNDER) {
-                    flags.innerHTML += `<div class="feed-item"><div class="feed-label">${esc(p.person)}</div><div class="feed-meta">${billAct}h vs ${p.planH}h planned</div></div>`;
-                }
-            }
-        });
-        if (!flags.innerHTML) flags.innerHTML = '<div style="padding:10px 0; font-size:11px; color:var(--color-text-tertiary);">✓ No variance flags this week</div>';
-    }
-
-    function renderCharts(weeks, phasesActual, phasesPlanned, phaseOrder, phaseNameMap, budget, sortedLabels) {
-        const uiLabels = sortedLabels.map(l => formatDateForUI(l));
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        const textColor = isDark ? '#94a3b8' : '#64748b';
-        const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
-        const accentColor = '#5e6ad2';
-        
-        if (chartRefs.burn) chartRefs.burn.destroy();
-        let cum = 0;
-        const todayS = toLocalISO(new Date());
-        const thisM  = getMonday(todayS);
-        const prevM  = sortedLabels[Math.max(0, sortedLabels.indexOf(thisM) - 1)];
-        const burnData = sortedLabels.map(l => { cum += weeks[l].burn; return Math.round(cum); });
-        const pointRadius = sortedLabels.map(l => (l === thisM || l === prevM) ? 4 : 0);
-        const pointLabels = sortedLabels.map((l, i) => (l === thisM || l === prevM) ? uiLabels[i] : '');
-        chartRefs.burn = new Chart(document.getElementById('chart-burn'), {
-            type: 'line',
-            data: { labels: uiLabels, datasets: [
-                { label: 'Spend', data: burnData, borderColor: accentColor, borderWidth: 2, fill: true, backgroundColor: 'rgba(94,106,210,0.05)', tension: 0.4, pointRadius, pointBackgroundColor: accentColor, datalabels: { display: (ctx) => pointRadius[ctx.dataIndex] > 0, formatter: (v) => '€'+fmt(v), anchor: 'top', align: 'top', font: { size: 10 } } },
-                { label: 'Budget', data: Array(sortedLabels.length).fill(Math.round(budget)), borderColor: textColor, borderDash: [4,4], borderWidth: 1, fill: false, pointRadius: 0, datalabels: { display: false } }
-            ]},
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } }, scales: { x: { grid: { display: false }, ticks: { color: textColor, maxRotation: 0 } }, y: { grid: { color: gridColor }, ticks: { color: textColor, callback: v => '€' + (v/1000) + 'k' } } } }
-        });
-
-        // ── chart-bench: Non-Billable vs Billable stacked bar ─────────────────
-        if (chartRefs.bench) chartRefs.bench.destroy();
-        const ctxBench = document.getElementById('chart-bench')?.getContext('2d');
-        if (ctxBench) {
-            chartRefs.bench = new Chart(ctxBench, {
-                type: 'bar',
-                data: { labels: uiLabels, datasets: [
-                    { label: 'Billable', data: sortedLabels.map(l => Math.round(weeks[l]?.bill || 0)), backgroundColor: 'rgba(94, 106, 210, 0.8)', borderRadius: 2 },
-                    { label: 'Non-Billable', data: sortedLabels.map(l => Math.round(weeks[l]?.nb || 0)), backgroundColor: 'rgba(245, 158, 11, 0.7)', borderRadius: 2 }
-                ]},
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: textColor, boxWidth: 10, font: { size: 10 } } }, datalabels: { display: false } }, scales: { x: { stacked: true, grid: { display: false }, ticks: { color: textColor, maxRotation: 0 } }, y: { stacked: true, grid: { color: gridColor }, ticks: { color: textColor } } } }
-            });
-        }
-
-        // ── chart-scurve: Planned vs Actual cumulative hours (S-Curve) ────────
-        if (chartRefs.scurve) chartRefs.scurve.destroy();
-        const ctxScurve = document.getElementById('chart-scurve')?.getContext('2d');
-        if (ctxScurve) {
-            let cumAct = 0, cumPlan = 0;
-            const actData  = sortedLabels.map(l => { cumAct  += (weeks[l]?.act  || 0); return Math.round(cumAct);  });
-            const planData = sortedLabels.map(l => { cumPlan += (weeks[l]?.plan || 0); return Math.round(cumPlan); });
-            chartRefs.scurve = new Chart(ctxScurve, {
-                type: 'line',
-                data: { labels: uiLabels, datasets: [
-                    { label: 'Actual', data: actData,  borderColor: accentColor,  borderWidth: 2, fill: false, tension: 0.4, pointRadius: 0 },
-                    { label: 'Plan',   data: planData, borderColor: '#10b981', borderWidth: 2, borderDash: [4, 4], fill: false, tension: 0.4, pointRadius: 0 }
-                ]},
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: textColor, boxWidth: 10, font: { size: 10 } } }, datalabels: { display: false }, tooltip: { mode: 'index', intersect: false } }, scales: { x: { grid: { display: false }, ticks: { color: textColor, maxRotation: 0 } }, y: { grid: { color: gridColor }, ticks: { color: textColor } } } }
-            });
-        }
-
-        // ── chart-phase: Phase Spend Actual vs Planned bar chart ──────────────
-        if (chartRefs.phase) chartRefs.phase.destroy();
-        const ctxPhase = document.getElementById('chart-phase')?.getContext('2d');
-        if (ctxPhase) {
-            const phaseLabels = phaseOrder.map(k => phaseNameMap[k] || k);
-            chartRefs.phase = new Chart(ctxPhase, {
-                type: 'bar',
-                data: { labels: phaseLabels, datasets: [
-                    { label: 'Actual (€)',  data: phaseOrder.map(k => Math.round(phasesActual[k]  || 0)), backgroundColor: 'rgba(94, 106, 210, 0.8)', borderRadius: 3 },
-                    { label: 'Planned (€)', data: phaseOrder.map(k => Math.round(phasesPlanned[k] || 0)), backgroundColor: 'rgba(16, 185, 129, 0.5)',  borderRadius: 3 }
-                ]},
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: textColor, boxWidth: 10, font: { size: 10 } } }, datalabels: { display: false }, tooltip: { mode: 'index', intersect: false } }, scales: { x: { grid: { display: false }, ticks: { color: textColor, maxRotation: 30 } }, y: { grid: { color: gridColor }, ticks: { color: textColor, callback: v => '€' + (v/1000).toFixed(0) + 'k' } } } }
-            });
-        }
-    }
-
-    function renderPhaseBreakdown() { /* merged into renderPhaseMerged */ }
-
-    function renderTopSpenders(latestWeek) {
-        const container=document.getElementById('top-spenders'); if(!container) return;
-        const agg={};
-        globalData.actuals.filter(r=>getMonday(r.Date)===latestWeek).forEach(r=>{ if(!agg[r.Person]) agg[r.Person]=0; agg[r.Person]+=parseFloat(r.Subtotal)||0; });
-        const sorted=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,5);
-        container.innerHTML=sorted.map(([n,s])=>`<div class="feed-item"><div class="feed-label">${esc(n)}</div><div class="feed-meta">€${s.toLocaleString()}</div></div>`).join('') || '<p style="color:var(--muted); font-size:11px;">No actuals for this week</p>';
-    }
-
-    function renderRolloff(people) {
-        const today=new Date();
-        const sorted=Object.keys(people).filter(p=>people[p].plannedLast).sort((a,b)=>new Date(people[a].plannedLast)-new Date(people[b].plannedLast)).slice(0,5);
-        document.getElementById('rolloff-list').innerHTML=sorted.map(p=>{
-            const d = new Date(people[p].plannedLast); d.setDate(d.getDate()+7);
-            return `<div class="feed-item"><div class="feed-label">${esc(p)}</div><div class="feed-meta">${formatDateForUI(toLocalISO(d))}</div></div>`;
-        }).join('');
-    }
-
-    function renderMilestones() {
-        const body    = document.getElementById('milestone-body');
-        const summary = document.getElementById('ms-summary');
-        if (!body) return;
-        const milestones = globalData.milestones || [];
-        if (!milestones.length) {
-            body.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--color-text-tertiary); padding:16px;">No milestones defined</td></tr>';
-            if (summary) summary.textContent = '';
-            return;
-        }
-        const today = toLocalISO(new Date());
-        const in30   = toLocalISO(new Date(Date.now() + 30 * 86400000));
-        let doneCount = 0, inProgressCount = 0, upcomingCount = 0;
-        body.innerHTML = milestones.map(ms => {
-            const due = ms.due || '';
-            let statusBadge, statusClass;
-            if (!due || due > in30) {
-                statusBadge = 'Upcoming'; statusClass = 'badge-neutral'; upcomingCount++;
-            } else if (due < today) {
-                statusBadge = 'Done'; statusClass = 'badge-success'; doneCount++;
-            } else {
-                statusBadge = 'In Progress'; statusClass = 'badge-warning'; inProgressCount++;
-            }
-            return `<tr>
-                <td><strong>${esc(ms.name)}</strong></td>
-                <td class="mono">${due ? formatDateForUI(due) : '—'}</td>
-                <td><span class="badge ${statusClass}">${statusBadge}</span></td>
-                <td style="color:var(--color-text-tertiary);">${esc(ms.notes || '')}</td>
-            </tr>`;
-        }).join('');
-        if (summary) summary.textContent = `${milestones.length} milestones · ${doneCount} done · ${inProgressCount} in progress · ${upcomingCount} upcoming`;
-    }
-
-    function renderDataIntegrity() {
-        const unknown = globalData.unknownTasks || [];
-        const issues  = globalData.jiraIssues  || [];
-        const card    = document.getElementById('card-data-integrity');
-        const listEl  = document.getElementById('unmapped-tasks-list');
-        const jiraEl  = document.getElementById('jira-hygiene-alerts');
-        
-        let hasAlerts = false;
-        
-        if (unknown.length > 0) {
-            hasAlerts = true;
-            listEl.innerHTML = unknown.map(t => `<div class="feed-item" style="padding:4px 0;"><span class="badge badge-warning" style="margin-right:8px;">Unknown</span> ${esc(t)}</div>`).join('');
-        } else {
-            listEl.innerHTML = '<div style="padding:10px 0;">✓ All tasks mapped to phases</div>';
-        }
-
-        const missingPts = issues.filter(i => !i.story_points || isNaN(parseFloat(i.story_points))).length;
-        let jiraHtml = '';
-        if (missingPts > 0) {
-            hasAlerts = true;
-            jiraHtml += `<div class="feed-item" style="padding:4px 0;"><span class="badge badge-danger" style="margin-right:8px;">Alert</span> ${missingPts} issues missing estimates (points)</div>`;
-        }
-        
-        const noAssignee = issues.filter(i => !i.assignee || i.assignee.toLowerCase() === 'unassigned').length;
-        if (noAssignee > 0) {
-            hasAlerts = true;
-            jiraHtml += `<div class="feed-item" style="padding:4px 0;"><span class="badge badge-warning" style="margin-right:8px;">Audit</span> ${noAssignee} issues unassigned</div>`;
-        }
-
-        jiraEl.innerHTML = jiraHtml || '<div style="padding:10px 0;">✓ Jira data is clean</div>';
-        
-        if (card) card.style.display = hasAlerts ? 'block' : 'none';
-    }
-
-    async function exportPDF() {
-        const el=document.getElementById('master-report');
-        await html2pdf().set({ margin:10, filename:'Report.pdf', jsPDF:{unit:'mm',format:'a3',orientation:'landscape'} }).from(el).save();
-    }
-
-    function switchTab(name) {
-        document.querySelectorAll('.tab-panel').forEach(p => { p.classList.toggle('active', p.id === 'tab-' + name); });
-        document.querySelectorAll('.nav-tabs .nav-tab').forEach(b => { b.classList.toggle('active', b.getAttribute('onclick')?.includes(`'${name}'`)); });
-        // Fix #6: only re-render charts on tab switch, not full processData() re-aggregation
-        if (name === 'program' && globalData._weeks) {
-            const budget = parseFloat(document.getElementById('budgetLimit').value) || 0;
-            renderCharts(globalData._weeks, globalData._phasesActual, globalData._phasesPlanned, globalData._phaseOrder, globalData._phaseNameMap, budget, Object.keys(globalData._weeks).sort());
-        }
-        else if (name === 'jira-high') jRenderHighLevel();
-        else if (name === 'jira-sprint') jRenderSprintView();
-        else if (name === 'capacity') renderCapacity();
-    }
-
-    let JIRA_SPRINT_DAYS = 10;
-    let jiraChartRefs = {};
-    function jStatusCategory(s) {
-        const sl = (s || "").trim().toUpperCase();
-        if (sl === "READY FOR DEV" || sl === "NEW" || sl === "TO DO") return "readydev";
-        if (sl === "IN PROGRESS") return "development";
-        if (sl === "READY FOR REVIEW") return "readyreview";
-        if (sl === "CODE REVIEW" || sl === "IN REVIEW") return "codereview";
-        if (sl === "READY FOR QA") return "readyqa";
-        if (sl === "QA" || sl === "UAT") return "uat";
-        if (sl === "RE-OPENED_CH" || sl === "RE-OPENED" || sl === "REOPENED") return "reopened";
-        if (sl === "DONE") return "done";
-        return "other";
-    }
-    function jStatusColor(s) {
-        const cat = jStatusCategory(s);
-        // Orange-based palette for active development items
-        const map = { 
-            done: '#1d9e75', 
-            development: '#f97316', 
-            readyreview: '#ea580c', 
-            codereview: '#f59e0b', 
-            readyqa: '#14b8a6', 
-            uat: '#0ea5e9', 
-            readydev: '#a8957a', 
-            reopened: '#e24b4a' 
-        };
-        return map[cat] || '#94a3b8';
-    }
-    function jAvatarColor(name) { return "#5e6ad2"; }
-    function jInitials(name) { return name ? name.split(" ").map(p => p[0]).join("") : "?"; }
-
-    function renderJiraTab() {
-        jPopulateSprintSelector();
-        jRenderHighLevel();
-    }
-
-    function jPopulateSprintSelector() {
-        const sel = document.getElementById("sprint-selector");
-        const capSel = document.getElementById("cap-sprint-selector");
-        const seen = new Set(); 
-        (globalData.jiraIssues || []).forEach(i => { if (i.sprint) seen.add(i.sprint.trim()); });
-        const sprints = [...seen].sort();
-        
-        const optionsHtml = sprints.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
-        if (sel) sel.innerHTML = optionsHtml;
-        if (capSel) capSel.innerHTML = optionsHtml;
-
-        // Default to current sprint (sprint whose dates contain today), else last alphabetically
-        const todayIso = toLocalISO(new Date());
-        const cfg = globalData.jiraConfig || {};
-        const sprintDates = cfg.sprint_dates || {};
-        let currentSprint = null;
-        for (const sp of sprints) {
-            const sd = sprintDates[sp] || {};
-            if (sd.start && sd.end && todayIso >= sd.start.substring(0,10) && todayIso <= sd.end.substring(0,10)) {
-                currentSprint = sp; break;
-            }
-        }
-        if (!currentSprint && sprints.length) currentSprint = sprints[sprints.length - 1];
-        
-        if (currentSprint) {
-            if (sel) sel.value = currentSprint;
-            if (capSel) capSel.value = currentSprint;
-        }
-
-        // Trigger capacity render if tab is visible
-        if (document.getElementById('tab-capacity')?.classList.contains('active')) {
-            renderCapacity();
-        }
-    }
-
-    function jRenderHighLevel() {
-        const issues = globalData.jiraIssues || [];
-        const cats = { readydev:0, development:0, readyreview:0, codereview:0, readyqa:0, uat:0, reopened:0, done:0 };
-        issues.forEach(i => { const c = jStatusCategory(i.status); if (cats[c] !== undefined) cats[c]++; });
-        const grid = document.getElementById("hl-phase-cards");
-        if (grid) grid.innerHTML = `
-            <div class="kpi-card"><h4>Ready for Dev</h4><div class="val">${cats.readydev}</div></div>
-            <div class="kpi-card"><h4>In Progress</h4><div class="val">${cats.development}</div></div>
-            <div class="kpi-card"><h4>Review / QA</h4><div class="val">${cats.readyreview + cats.codereview + cats.readyqa + cats.uat}</div></div>
-            <div class="kpi-card"><h4>Done</h4><div class="val">${cats.done}</div></div>
-            <div class="kpi-card"><h4>Total Issues</h4><div class="val">${issues.length}</div></div>`;
-        safeText('hl-stat-qual',  cats.readydev);
-        safeText('hl-stat-dev',   cats.development);
-        safeText('hl-stat-uat',   cats.uat + cats.readyqa);
-        safeText('hl-stat-done',  cats.done);
-
-        // ── Velocity chart: points completed per month ────────────────────────
-        const monthlyVelo = {};
-        issues.forEach(i => {
-            const cat = jStatusCategory(i.status);
-            if (cat !== 'done') return;
-            const raw = i['status_category_changed'] || i['resolutiondate'] || '';
-            const dateStr = raw ? raw.substring(0, 7) : null; // YYYY-MM
-            if (!dateStr) return;
-            const pts = parseFloat(i.story_points) || 0;
-            monthlyVelo[dateStr] = (monthlyVelo[dateStr] || 0) + pts;
-        });
-        const veloMonths = Object.keys(monthlyVelo).sort();
-
-        if (jiraChartRefs['hl-velocity']) jiraChartRefs['hl-velocity'].destroy();
-        const ctxV = document.getElementById('hl-chart-velocity')?.getContext('2d');
-        if (ctxV) {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const tc = isDark ? '#94a3b8' : '#64748b';
-            const gc = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
-            jiraChartRefs['hl-velocity'] = new Chart(ctxV, {
-                type: 'bar',
-                data: { labels: veloMonths, datasets: [{ label: 'Points Done', data: veloMonths.map(m => monthlyVelo[m] || 0), backgroundColor: 'rgba(94,106,210,0.8)', borderRadius: 3 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: tc } }, y: { grid: { color: gc }, ticks: { color: tc } } } }
-            });
-        }
-
-        // ── Category distribution donut ───────────────────────────────────────
-        if (jiraChartRefs['hl-categories']) jiraChartRefs['hl-categories'].destroy();
-        const ctxC = document.getElementById('hl-chart-categories')?.getContext('2d');
-        if (ctxC) {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const tc = isDark ? '#94a3b8' : '#64748b';
-            jiraChartRefs['hl-categories'] = new Chart(ctxC, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Ready for Dev','In Progress','Ready for Review','Code Review','Ready for QA','QA','Re-opened','Done'],
-                    datasets: [{ data: [cats.readydev, cats.development, cats.readyreview, cats.codereview, cats.readyqa, cats.uat, cats.reopened, cats.done], backgroundColor: ['#f59e0b','#3b82f6','#8b5cf6','#6366f1','#14b8a6','#0ea5e9','#ef4444','#10b981'], borderWidth: 0 }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: tc, boxWidth: 10, font: { size: 10 } } }, datalabels: { display: false } } }
-            });
-        }
-
-        // ── Spend analysis chart: Actual Hours vs Story Points per epic/label ──
-        if (jiraChartRefs['hl-spend']) jiraChartRefs['hl-spend'].destroy();
-        const ctxS = document.getElementById('hl-chart-spend')?.getContext('2d');
-        if (ctxS) {
-            const spendData = globalData.spendAnalysis || [];
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const tc = isDark ? '#94a3b8' : '#64748b';
-            const gc = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
-
-            // Group issues by assignee for spend view
-            const byAssignee = {};
-            issues.forEach(i => {
-                const a = (i.assignee || 'Unassigned').trim();
-                if (!byAssignee[a]) byAssignee[a] = { pts: 0 };
-                byAssignee[a].pts += parseFloat(i.story_points) || 0;
-            });
-            const assignees = Object.keys(byAssignee).sort((a,b) => byAssignee[b].pts - byAssignee[a].pts).slice(0, 10);
-
-            jiraChartRefs['hl-spend'] = new Chart(ctxS, {
-                type: 'bar',
-                data: { labels: assignees, datasets: [{ label: 'Story Points', data: assignees.map(a => byAssignee[a].pts), backgroundColor: 'rgba(94,106,210,0.8)', borderRadius: 3 }] },
-                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { x: { grid: { color: gc }, ticks: { color: tc } }, y: { grid: { display: false }, ticks: { color: tc } } } }
-            });
-        }
-    }
-
-    function jRenderSprintView() {
-        const sprintName = document.getElementById("sprint-selector").value;
-        const issues = (globalData.jiraIssues || []).filter(i => i.sprint === sprintName);
-        const cfg = globalData.jiraConfig || {};
-        const sprintDates = (cfg.sprint_dates || {})[sprintName] || {};
-        const sprintStart = sprintDates.start || cfg.sprint_start || '';
-        const sprintEnd   = sprintDates.end   || cfg.sprint_end   || '';
-        const sprintDays  = sprintDates.days  || cfg.sprint_days  || 10;
-
-        // Sprint date label
-        const datesEl = document.getElementById('sv-sprint-dates');
-        if (datesEl && sprintStart && sprintEnd) {
-            datesEl.textContent = `${formatDateForUI(sprintStart)} → ${formatDateForUI(sprintEnd)}`;
-        } else if (datesEl) { datesEl.textContent = ''; }
-
-        // ── Counts ────────────────────────────────────────────────────────────
-        const totalPts   = issues.reduce((s, i) => s + (parseFloat(i.story_points) || 0), 0);
-        const donePts    = issues.filter(i => jStatusCategory(i.status) === 'done').reduce((s,i) => s + (parseFloat(i.story_points)||0), 0);
-        const startMs    = sprintStart ? new Date(sprintStart).getTime() : null;
-
-        const scopeCreep = startMs ? issues.filter(i => {
-            const added = i['created'] || '';
-            return added && new Date(added.substring(0,10)).getTime() > startMs;
-        }).length : 0;
-        const blocked    = issues.filter(i => (i.labels || []).includes('blocked')).length;
-
-        safeText('jsb-total',      issues.length);
-        safeText('jsb-done',       issues.filter(i => jStatusCategory(i.status) === 'done').length);
-        safeText('jsb-readydev',   issues.filter(i => jStatusCategory(i.status) === 'readydev').length);
-        safeText('jsb-dev',        issues.filter(i => jStatusCategory(i.status) === 'development').length);
-        safeText('jsb-readyreview',issues.filter(i => jStatusCategory(i.status) === 'readyreview').length);
-        safeText('jsb-codereview', issues.filter(i => jStatusCategory(i.status) === 'codereview').length);
-        safeText('jsb-readyqa',    issues.filter(i => jStatusCategory(i.status) === 'readyqa').length);
-        safeText('jsb-uat',        issues.filter(i => jStatusCategory(i.status) === 'uat').length);
-        safeText('jsb-reopened',   issues.filter(i => jStatusCategory(i.status) === 'reopened').length);
-        safeText('jsb-creep',      scopeCreep);
-        safeText('jsb-blocked',    blocked);
-
-        const ptsBadge = document.getElementById('sv-sprint-points');
-        if (ptsBadge) ptsBadge.innerHTML = `<span class="badge badge-success">${donePts.toFixed(0)} / ${totalPts.toFixed(0)} pts done</span>`;
-
-        // ── Burndown chart ─────────────────────────────────────────────────────
-        if (jiraChartRefs['sv-burndown']) jiraChartRefs['sv-burndown'].destroy();
-        const ctxB = document.getElementById('sv-chart-burndown')?.getContext('2d');
-        if (ctxB && sprintStart && sprintEnd) {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const tc = isDark ? '#94a3b8' : '#64748b';
-            const gc = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
-
-            // Build day labels
-            const days = []; let d = new Date(sprintStart);
-            const endD = new Date(sprintEnd);
-            while (d <= endD) {
-                const dow = d.getDay();
-                if (dow !== 0 && dow !== 6) days.push(toLocalISO(d));
-                d.setDate(d.getDate()+1);
-            }
-
-            // Ideal burndown
-            const ideal = days.map((_, idx) => Math.round(totalPts * (1 - idx / Math.max(days.length-1, 1))));
-
-            // Actual remaining: based on 'done' status_category_changed
-            const doneByDay = {};
-            issues.forEach(i => {
-                if (jStatusCategory(i.status) !== 'done') return;
-                const scc = (i.status_category_changed || '').substring(0,10);
-                if (!scc) return;
-                doneByDay[scc] = (doneByDay[scc] || 0) + (parseFloat(i.story_points) || 0);
-            });
-            let cumDone = 0;
-            const todayIso2 = toLocalISO(new Date());
-            const actual = days.map(day => {
-                if (day > todayIso2) return null;
-                cumDone += (doneByDay[day] || 0);
-                return Math.round(Math.max(0, totalPts - cumDone));
-            });
-
-            // Ready for UAT pipeline: tickets/points in readyqa + uat per day (cumulative entered)
-            const uatByDay = {};
-            issues.forEach(i => {
-                const cat = jStatusCategory(i.status);
-                if (!['readyqa','uat'].includes(cat)) return;
-                const scc = (i.status_category_changed || '').substring(0,10);
-                if (!scc) return;
-                uatByDay[scc] = (uatByDay[scc] || 0) + (parseFloat(i.story_points) || 0);
-            });
-            let cumUAT = 0;
-            const uatLine = days.map(day => {
-                if (day > todayIso2) return null;
-                cumUAT += (uatByDay[day] || 0);
-                return Math.round(cumUAT);
-            });
-
-            jiraChartRefs['sv-burndown'] = new Chart(ctxB, {
-                type: 'line',
-                data: { labels: days.map(d => d.substring(5)), datasets: [
-                    { label: 'Ideal',        data: ideal,   borderColor: '#94a3b8', borderDash: [4,4], borderWidth: 1.5, pointRadius: 0, fill: false },
-                    { label: 'Remaining',    data: actual,  borderColor: '#5e6ad2', borderWidth: 2, tension: 0.3, pointRadius: 3, fill: false },
-                    { label: 'In UAT Queue', data: uatLine, borderColor: '#14b8a6', borderWidth: 1.5, tension: 0.3, pointRadius: 2, fill: false, borderDash: [2,2] }
-                ]},
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: tc, boxWidth: 10, font: { size: 10 } } }, datalabels: { display: false }, tooltip: { mode: 'index', intersect: false } }, scales: { x: { grid: { display: false }, ticks: { color: tc, maxRotation: 0 } }, y: { grid: { color: gc }, ticks: { color: tc }, min: 0 } } }
-            });
-        } else if (ctxB) {
-            // No sprint dates — simple remaining bar
-            jiraChartRefs['sv-burndown'] = new Chart(ctxB, {
-                type: 'bar',
-                data: { labels: ['Done','Remaining'], datasets: [{ data: [donePts, Math.max(0, totalPts-donePts)], backgroundColor: ['#10b981','#5e6ad2'], borderRadius: 3 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } } }
-            });
-        }
-
-        // ── Risk Labels distribution — from jiraSummary sheet ─────────────────
-        if (jiraChartRefs['sv-labels']) jiraChartRefs['sv-labels'].destroy();
-        const ctxL = document.getElementById('sv-chart-labels')?.getContext('2d');
-        if (ctxL) {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const tc = isDark ? '#94a3b8' : '#64748b';
-            const labelCounts = {};
-            // Aggregate from jiraSummary rows - look for 'label' or 'labels' columns
-            const summaryRows = globalData.jiraSummary || [];
-            if (summaryRows.length > 0) {
-                const keys = Object.keys(summaryRows[0]);
-                const labelKeys = keys.filter(k => /label/i.test(k));
-                summaryRows.forEach(row => {
-                    labelKeys.forEach(k => {
-                        const val = row[k];
-                        if (!val) return;
-                        String(val).split(/[,;|]+/).map(s => s.trim()).filter(Boolean).forEach(l => { labelCounts[l] = (labelCounts[l]||0)+1; });
-                    });
-                });
-            }
-            // Fallback: use current sprint issues labels if summary has none
-            if (Object.keys(labelCounts).length === 0) {
-                issues.forEach(i => (i.labels || []).forEach(l => { labelCounts[l] = (labelCounts[l]||0)+1; }));
-            }
-            const topLabels = Object.keys(labelCounts).sort((a,b) => labelCounts[b]-labelCounts[a]).slice(0,8);
-            const palette = ['#5e6ad2','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#14b8a6','#3b82f6'];
-            jiraChartRefs['sv-labels'] = new Chart(ctxL, {
-                type: 'doughnut',
-                data: { labels: topLabels.length ? topLabels : ['No labels'], datasets: [{ data: topLabels.length ? topLabels.map(l=>labelCounts[l]) : [1], backgroundColor: palette.slice(0, Math.max(topLabels.length,1)), borderWidth: 0 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: tc, boxWidth: 10, font: { size: 10 } } }, datalabels: { display: false } } }
-            });
-        }
-
-        // ── At-Risk Queue (Aging + SLA) ───────────────────────────────────────
-        const atRiskBody = document.getElementById('at-risk-body');
-        const atRiskBadge = document.getElementById('at-risk-count');
-        if (atRiskBody) {
-            const risks = [];
-            issues.forEach(i => {
-                const cat = jStatusCategory(i.status);
-                const scc = i.status_category_changed || '';
-                if (!scc) return;
-                const hrs = workingHoursElapsed_(new Date(scc), new Date(), i.assignee);
-
-                // 1. SLA Check (In Progress only) — Dual threshold: warn & over
-                if (cat === 'development') {
-                    const ptsRaw = parseFloat(i.story_points);
-                    if (ptsRaw > 0) {
-                        const pts = Math.round(ptsRaw);
-                        const slaCfg = CONFIG.DEV_SLA[pts] || CONFIG.DEV_SLA.default;
-                        const warnThresh = slaCfg.warn;
-                        const overThresh = slaCfg.over;
-                        // Check for SLA Breach (over threshold + grace period)
-                        if (hrs > overThresh + CONFIG.SLA_GRACE_HOURS) {
-                            risks.push({ i, hrs, type: 'SLA Breach', label: `SLA ${overThresh}h`, severity: 'danger' });
-                        }
-                        // Check for SLA Warning (between warn and over thresholds)
-                        else if (hrs > warnThresh + CONFIG.SLA_GRACE_HOURS) {
-                            risks.push({ i, hrs, type: 'SLA Warning', label: `SLA ${warnThresh}h`, severity: 'warning' });
-                        }
-                    }
-                }
-                // 2. Ready Review Aging
-                if (cat === 'readyreview' && hrs >= CONFIG.AGING_THRESHOLD_WORK_HRS) {
-                    risks.push({ i, hrs, type: 'Ready Review', label: 'Aging', severity: 'warning' });
-                }
-                // 3. Code Review Aging
-                if (cat === 'codereview' && hrs >= CONFIG.AGING_THRESHOLD_WORK_HRS) {
-                    risks.push({ i, hrs, type: 'Code Review', label: 'Aging', severity: 'warning' });
-                }
-            });
-
-            risks.sort((a,b) => b.hrs - a.hrs);
-            atRiskBody.innerHTML = risks.length
-                ? risks.map(({i, hrs, type, label, severity}) => {
-                    const badgeClass = severity === 'danger' ? 'badge-danger' : 'badge-warning';
-                    return `<tr><td><span class="jira-key">${esc(i.key)}</span></td><td>${esc(i.summary)}</td><td>${esc(i.assignee)}</td><td>${type}</td><td><span class="badge ${badgeClass}">${hrs.toFixed(1)}h / ${label}</span></td></tr>`;
-                }).join('')
-                : '<tr><td colspan="5" style="text-align:center;color:var(--color-text-tertiary);padding:12px;">No risk items found ✓</td></tr>';
-            if (atRiskBadge) { atRiskBadge.textContent = risks.length; atRiskBadge.style.display = risks.length ? 'inline-block' : 'none'; }
-        }
-
-        // ── Resources Sprint Spend ───────────────────────────────────────────
-        const resAgg = {};
-        if (sprintStart && sprintEnd) {
-            const startStr = sprintStart.substring(0, 10);
-            const endStr   = sprintEnd.substring(0, 10);
-
-            // Plan within sprint dates
-            (globalData.plan || []).forEach(p => {
-                const pd = parseDateSafe(p.dateStr);
-                if (pd && pd >= startStr && pd <= endStr) {
-                    if (!resAgg[p.person]) resAgg[p.person] = { plan: 0, act: 0, bill: 0, nb: 0, spend: 0 };
-                    resAgg[p.person].plan += (p.planH || 0);
-                }
-            });
-
-            // Actuals within sprint dates
-            (globalData.actuals || []).forEach(r => {
-                const rd = parseDateSafe(r.Date);
-                if (rd && rd >= startStr && rd <= endStr) {
-                    const person = (r.Person || '').trim();
-                    if (!person) return;
-                    if (!resAgg[person]) resAgg[person] = { plan: 0, act: 0, bill: 0, nb: 0, spend: 0 };
-                    const h = parseFloat(r['Time in Hours']) || 0;
-                    const s = parseFloat(r.Subtotal) || 0;
-                    const rate = parseFloat(r.Rate) || 0;
-                    resAgg[person].act += h;
-                    resAgg[person].spend += s;
-                    if (rate > 0) resAgg[person].bill += h;
-                    else resAgg[person].nb += h;
-                }
-            });
-        }
-
-        const resBody = document.getElementById('sv-resources-body');
-        if (resBody) {
-            const sortedNames = Object.keys(resAgg).sort();
-            resBody.innerHTML = sortedNames.length 
-                ? sortedNames.map(name => {
-                    const d = resAgg[name];
-                    const actStyle = d.act > d.plan * 1.1 ? 'color:var(--color-text-danger)' : (d.act > 0 && d.act < d.plan * 0.8 ? 'color:var(--color-text-warning)' : '');
-                    return `<tr>
-                        <td><strong>${esc(name)}</strong></td>
-                        <td style="text-align:right;" class="mono">${d.plan.toFixed(1)}</td>
-                        <td class="mono" style="text-align:right; ${actStyle}">${d.act.toFixed(1)}</td>
-                        <td style="text-align:right;" class="mono">${d.bill.toFixed(1)}</td>
-                        <td style="text-align:right;" class="mono">${d.nb.toFixed(1)}</td>
-                        <td style="text-align:right;" class="mono">€${fmt(d.spend)}</td>
-                    </tr>`;
-                }).join('')
-                : '<tr><td colspan="6" style="text-align:center;color:var(--color-text-tertiary);padding:16px;">No time entries or plan for this sprint range</td></tr>';
-        }
-
-        // ── Issue detail table ─────────────────────────────────────────────────
-        const tbody = document.getElementById("sv-issues-body");
-        if (tbody) tbody.innerHTML = issues.map(i => `<tr>
-            <td><span class="jira-key">${esc(i.key)}</span></td>
-            <td><span class="badge" style="background:${jStatusColor(i.status)}22; color:${jStatusColor(i.status)};">${esc(i.status)}</span></td>
-            <td>${esc(i.summary)}</td>
-            <td>${esc(i.assignee)}</td>
-            <td class="mono">${esc(i.story_points) || '—'}</td>
-        </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--color-text-tertiary);padding:16px;">No issues in this sprint</td></tr>';
-    }
-
-    // State for Capacity overrides and selections
-    let capacityState = {
-        selected: {}, // { "Person Name": true/false }
-        roleOverrides: {}, // { "Person Name": "FE" | "BE" | "Other" }
-        productivityQuotients: {} // { "Person Name": 0-100 }
-    };
-
-    function toggleAllCapacityResources(checked) {
-        const resSet = new Set();
-        (globalData.plan || []).forEach(p => p.person && resSet.add(p.person));
-        (globalData.actuals || []).forEach(r => r.Person && resSet.add(r.Person));
-        resSet.forEach(name => capacityState.selected[name] = checked);
-        renderCapacity();
-    }
-
-    function updateCapacityState(name, key, value) {
-        if (!capacityState[key]) capacityState[key] = {};
-        capacityState[key][name] = value;
-        renderCapacity();
-    }
-
-    // Fix #7: Refactored Capacity Planner with Productivity Quotient and Role Summaries
-    function renderCapacity() {
-        const sel = document.getElementById("cap-sprint-selector");
-        const sprintName = sel ? sel.value : "";
-        if (!sprintName) {
-            const body = document.getElementById("capacity-body");
-            if (body) body.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--color-text-tertiary);">Select a sprint to see capacity</td></tr>';
-            return;
-        }
-
-        const globalQSlider = document.getElementById("cap-quotient-slider");
-        const globalQuotient = (globalQSlider ? parseFloat(globalQSlider.value) : 90);
-
-        const cfg = globalData.jiraConfig || {};
-        const sprintDates = (cfg.sprint_dates || {})[sprintName] || {};
-        let sprintStart = sprintDates.start ? new Date(sprintDates.start) : null;
-        let sprintEnd = sprintDates.end ? new Date(sprintDates.end) : null;
-
-        // Force sprint range: Monday Week 1 (10:00) to Friday Week 2 (18:00) = 80h Base
-        if (sprintStart) {
-            const day = sprintStart.getDay();
-            if (day === 0) sprintStart.setDate(sprintStart.getDate() + 1);
-            else if (day === 6) sprintStart.setDate(sprintStart.getDate() + 2);
-            sprintStart.setHours(10, 0, 0, 0);
-        }
-        if (sprintEnd) {
-            sprintEnd.setHours(18, 0, 0, 0);
-        }
-
-        const body = document.getElementById("capacity-body");
-        if (!body || !sprintStart || !sprintEnd) return;
-
-        const resources = {};
-        (globalData.plan || []).forEach(p => { if (p.person && !resources[p.person]) resources[p.person] = p.role || "Unassigned"; });
-        (globalData.actuals || []).forEach(r => { if (r.Person && !resources[r.Person]) resources[r.Person] = r.Role || "Unassigned"; });
-
-        let totalFE = 0, totalBE = 0, totalNet = 0;
-        
-        // Filter resources to only include those with Developer, FE, or BE roles
-        const developerNames = Object.keys(resources).filter(name => {
-            const role = resources[name] || "";
-            return /frontend|fe|backend|be|developer|dev/i.test(role);
-        }).sort();
-
-        const rows = developerNames.map(name => {
-            const originalRole = resources[name];
-            const isSelected = capacityState.selected[name] !== false;
-            
-            if (!capacityState.roleOverrides[name]) {
-                capacityState.roleOverrides[name] = /frontend|fe/i.test(originalRole) ? "FE" : (/backend|be/i.test(originalRole) ? "BE" : "Other");
-            }
-            const roleOverride = capacityState.roleOverrides[name];
-            
-            // Individual Productivity Quotient
-            const individualQ = capacityState.productivityQuotients[name] ?? globalQuotient;
-            const quotientDecimal = individualQ / 100;
-
-            const weekdayH = (() => {
-                let h=0, d=new Date(sprintStart);
-                while(d <= sprintEnd) { if(d.getDay()!==0 && d.getDay()!==6) h+=8; d.setDate(d.getDate()+1); }
-                return h;
-            })();
-
-            const personalH = workingHoursElapsed_(sprintStart, sprintEnd, name);
-            const holidayH = weekdayH - workingHoursElapsed_(sprintStart, sprintEnd, null);
-            const ptoH = weekdayH - holidayH - personalH;
-
-            const planForPerson = (globalData.plan || []).filter(p => p.person === name);
-            const sprintWeeks = [];
-            let currMon = getMonday(toLocalISO(sprintStart));
-            const endMon = getMonday(toLocalISO(sprintEnd));
-            while(currMon <= endMon) { sprintWeeks.push(currMon); currMon = getMonday(new Date(new Date(currMon).getTime() + 604800000)); }
-            const totalPlannedH = planForPerson.filter(p => sprintWeeks.includes(getMonday(p.dateStr))).reduce((sum, p) => sum + (p.planH || 0), 0);
-            const avgPlannedH = sprintWeeks.length ? (totalPlannedH / sprintWeeks.length) : 0;
-            const allocationFactor = avgPlannedH > 0 ? (avgPlannedH / 40) : 1.0; 
-
-            // Calculate PTO only within allocated weeks
-            let ptoInAllocatedH = 0;
-            const leavesForPerson = globalData._processedLeaves?.get(name);
-            if (leavesForPerson && totalPlannedH > 0) {
-                sprintWeeks.forEach(weekMon => {
-                    const weekPlan = planForPerson.find(p => getMonday(p.dateStr) === weekMon);
-                    if (!weekPlan || !weekPlan.planH) return; // Skip unallocated weeks
-                    const weekEnd = new Date(new Date(weekMon).getTime() + 5 * 86400000);
-                    leavesForPerson.forEach(leaveDate => {
-                        if (leaveDate >= weekMon && leaveDate < toLocalISO(weekEnd)) ptoInAllocatedH += 8;
-                    });
-                });
-            }
-
-            const rawH = totalPlannedH - ptoInAllocatedH;
-            const netH = rawH * quotientDecimal;
-
-            if (isSelected) {
-                if (roleOverride === "FE") totalFE += netH;
-                if (roleOverride === "BE") totalBE += netH;
-                totalNet += netH;
-            }
-
-            const explanation = `<div style="font-size:9px; color:var(--color-text-tertiary); line-height:1.2; margin-top:2px;">
-                Planned: ${totalPlannedH.toFixed(0)}h - PTO (allocated weeks): ${ptoInAllocatedH.toFixed(0)}h
-            </div>`;
-
-            return `<tr>
-                <td><input type="checkbox" ${isSelected ? 'checked' : ''} onchange="updateCapacityState('${esc(name)}', 'selected', this.checked)"></td>
-                <td><strong>${esc(name)}</strong></td>
-                <td>${esc(originalRole)}</td>
-                <td>
-                    <select onchange="updateCapacityState('${esc(name)}', 'roleOverrides', this.value)" style="font-size:11px; padding:2px 4px; border-radius:4px; border:1px solid var(--color-border); background:transparent; color:inherit;">
-                        <option value="FE" ${roleOverride==='FE'?'selected':''}>FE</option>
-                        <option value="BE" ${roleOverride==='BE'?'selected':''}>BE</option>
-                        <option value="Other" ${roleOverride==='Other'?'selected':''}>Other</option>
-                    </select>
-                </td>
-                <td style="text-align:right;" class="mono">
-                    <strong>${rawH.toFixed(1)}h</strong>
-                    ${explanation}
-                </td>
-                <td style="text-align:right; width:160px;">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <input type="range" min="10" max="100" step="5" value="${individualQ}" 
-                               oninput="this.nextElementSibling.textContent = this.value + '%'"
-                               onchange="updateCapacityState('${esc(name)}', 'productivityQuotients', parseInt(this.value))" 
-                               style="width:100px;">
-                        <span class="mono" style="font-size:11px; width:30px;">${individualQ}%</span>
-                    </div>
-                </td>
-                <td style="text-align:right;" class="mono" style="font-weight:600; color:${isSelected?'var(--color-accent)':'var(--color-text-tertiary)'};">${netH.toFixed(1)}h</td>
-            </tr>`;
-        });
-
-        body.innerHTML = rows.length ? rows.join("") : '<tr><td colspan="7" style="text-align:center; padding:20px;">No resources found</td></tr>';
-        
-        safeText("cap-fe-total", `${totalFE.toFixed(0)}h`);
-        safeText("cap-be-total", `${totalBE.toFixed(0)}h`);
-        safeText("cap-net-total", `${totalNet.toFixed(0)}h`);
-
-        const summary = document.getElementById("capacity-summary");
-        if (summary) {
-            summary.innerHTML = `<span style="font-size:11px; color:var(--color-text-secondary);">Sprint range: <strong>${formatDateForUI(toLocalISO(sprintStart))}</strong> to <strong>${formatDateForUI(toLocalISO(sprintEnd))}</strong> · 
-                Calculated for ${Object.keys(resources).length} resources. PTO/Holidays automatically subtracted.</span>`;
-        }
-    }
-
-    window.onload = fetchData;
-</script>
 </body>
 </html>

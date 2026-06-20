@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weekly Report — Control Tower</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="./assets/report-EtqWxaOt.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/jira-FmSVR2sr.js">
+  <link rel="stylesheet" crossorigin href="./assets/jira-B-CdHwnz.css">
+  <link rel="stylesheet" crossorigin href="./assets/report-D_wcgluL.css">
+</head>
+<body>
+  <div id="rpt-shell">
+    <header class="rpt-topbar">
+      <span class="rpt-logo">Control Tower</span>
+      <span class="rpt-title">Weekly Report Generator</span>
+      <a href="./index.html" class="btn btn--ghost btn--sm">← Back to Dashboard</a>
+    </header>
+
+    <div id="rpt-auth-wall" class="rpt-centered" style="display:none">
+      <p class="rpt-auth-msg">Sign in via the <a href="./index.html">Control Tower dashboard</a> first, then return here.</p>
+    </div>
+
+    <div id="rpt-no-project" class="rpt-centered" style="display:none">
+      <p class="rpt-auth-msg">No active project found. <a href="./index.html">Open a project</a> in Control Tower first.</p>
+    </div>
+
+    <div id="rpt-loading" class="rpt-centered">
+      <div class="spinner"></div>
+      <p>Loading project data…</p>
+    </div>
+
+    <div id="rpt-error" class="rpt-centered" style="display:none">
+      <p id="rpt-error-msg" class="rpt-error-text"></p>
+      <button class="btn btn--primary" onclick="location.reload()">Retry</button>
+    </div>
+
+    <main id="rpt-main" style="display:none">
+      <div class="rpt-toolbar">
+        <div>
+          <span id="rpt-project-name" class="rpt-project-label"></span>
+          <span id="rpt-sprint-label" class="rpt-sprint-label"></span>
+        </div>
+        <div style="display:flex;gap:0.5rem;align-items:center">
+          <button id="btn-generate" class="btn btn--ghost" onclick="window.generateReport()">
+            ⬇ Download .docx
+          </button>
+          <button id="btn-gdocs" class="btn btn--primary" onclick="window.sendToGoogleDocs()">
+            <span id="btn-gdocs-label">↗ Send to Google Docs</span>
+            <span id="btn-gdocs-spinner" style="display:none">Uploading…</span>
+          </button>
+        </div>
+      </div>
+      <div id="rpt-sections" class="rpt-sections"></div>
+    </main>
+  </div>
+
+  <script src="https://accounts.google.com/gsi/client" async></script>
+</body>
+</html>
